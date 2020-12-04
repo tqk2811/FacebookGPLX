@@ -1,0 +1,22 @@
+﻿<Window x:Class="FacebookGPLX.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:WpfUiControls="clr-namespace:TqkLibrary.WpfUi.UserControls;assembly=TqkLibrary.WpfUi"
+        xmlns:local="clr-namespace:FacebookGPLX.UI"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Button HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="146">
+            <TextBlock>
+                <Run Text="Load Accounts ("/>
+                <Run Text="{Binding AccountCount}"/>
+                <Run Text=")"/>
+            </TextBlock>
+        </Button>
+        <TextBlock HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" Text="Số Luồng:" VerticalAlignment="Top"/>
+        <WpfUiControls:NumericUpDown Margin="91,30,0,0" Min="1" Max="50" Step="1" NumValue="{Binding MaxRun}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="75"/>
+    </Grid>
+</Window>

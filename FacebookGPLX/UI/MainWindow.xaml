@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:WpfUiControls="clr-namespace:TqkLibrary.WpfUi.UserControls;assembly=TqkLibrary.WpfUi"
         xmlns:local="clr-namespace:FacebookGPLX.UI"
+        Loaded="Window_Loaded"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="146">
+        <Button x:Name="BT_LoadAccounts" Click="BT_LoadAccounts_Click" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="146">
             <TextBlock>
                 <Run Text="Load Accounts ("/>
                 <Run Text="{Binding AccountCount}"/>

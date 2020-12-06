@@ -126,6 +126,8 @@
     </ApplicationDefinition>
     <Compile Include="ChromeProfile.cs" />
     <Compile Include="Common\ImageHelper.cs" />
+    <Compile Include="Common\ProxyHelper.cs" />
+    <Compile Include="Common\UserAgent.cs" />
     <Compile Include="Data\AccountData.cs" />
     <Compile Include="Data\SettingData.cs" />
     <Compile Include="Extensions.cs" />

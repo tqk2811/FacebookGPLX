@@ -9,6 +9,11 @@ namespace FacebookGPLX.Data
     public string PassWord { get; set; }
     public string TwoFA { get; set; }
 
+    public override string ToString()
+    {
+      return $"{UserName}|{PassWord}|{TwoFA}";
+    }
+
     public static List<AccountData> LoadFromTxt(string filePath)
     {
       List<AccountData> accountDatas = new List<AccountData>();

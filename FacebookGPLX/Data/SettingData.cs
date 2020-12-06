@@ -12,8 +12,8 @@ namespace FacebookGPLX.Data
   class SettingData
   {
     public int MaxRun { get; set; }
-
-
+    public string TwoCaptchaKey { get; set; } = "25fbc812b40b10686f4dc98105bbf62f";//"d86e5ffd18ee2fe0c74b848722d7e24e";
+    public string RentCodeKey { get; set; } = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
 
 
 

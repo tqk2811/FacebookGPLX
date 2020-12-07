@@ -7,17 +7,66 @@
         xmlns:local="clr-namespace:FacebookGPLX.UI"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        MinHeight="300" MinWidth="650"
+        Title="Facebook GPLX" Height="350" Width="800">
     <Grid>
-        <Button x:Name="BT_LoadAccounts" Click="BT_LoadAccounts_Click" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="146">
-            <TextBlock>
-                <Run Text="Load Accounts ("/>
-                <Run Text="{Binding AccountCount}"/>
-                <Run Text=")"/>
-            </TextBlock>
-        </Button>
-        <TextBlock HorizontalAlignment="Left" Margin="10,34,0,0" TextWrapping="Wrap" Text="Số Luồng:" VerticalAlignment="Top"/>
-        <WpfUiControls:NumericUpDown Margin="91,30,0,0" Min="1" Max="50" Step="1" NumValue="{Binding MaxRun}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="75"/>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.RowSpan="2">
+            <Button x:Name="BT_LoadAccounts" Click="BT_LoadAccounts_Click" Margin="10,5,10,0" VerticalAlignment="Top" Height="20">
+                <TextBlock>
+                    <Run Text="Load Accounts ("/>
+                    <Run Text="{Binding AccountCount}"/>
+                    <Run Text=")"/>
+                </TextBlock>
+            </Button>
+            <Button x:Name="BT_LoadProxy" Click="BT_LoadProxy_Click" Margin="10,30,10,0" VerticalAlignment="Top">
+                <TextBlock>
+                    <Run Text="Load Proxy ("/>
+                    <Run Text="{Binding ProxyCount}"/>
+                    <Run Text=")"/>
+                </TextBlock>
+            </Button>
+
+            <TextBlock HorizontalAlignment="Left" Margin="10,67,0,0" TextWrapping="Wrap" Text="Số Luồng:" VerticalAlignment="Top" Height="16" Width="53"/>
+            <WpfUiControls:NumericUpDown Margin="0,63,70,0" Min="1" Max="50" Step="1" NumValue="{Binding MaxRun}" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+
+            <TextBlock HorizontalAlignment="Left" Margin="10,96,0,0" TextWrapping="Wrap" Text="Delay Bước:" VerticalAlignment="Top"/>
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMin" NumValue="{Binding DelayStepMin}" Min="0" Max="{Binding NumValue,ElementName=NUD_DelayStepMax}" Step="100" Margin="0,90,70,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMax" NumValue="{Binding DelayStepMax}" Min="{Binding NumValue,ElementName=NUD_DelayStepMin}" Max="10000" Step="100" Margin="0,90,5,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+
+            <TextBlock HorizontalAlignment="Left" Margin="10,122,0,0" TextWrapping="Wrap" Text="Delay Web Load:" VerticalAlignment="Top"/>
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMin" NumValue="{Binding DelayWebMin}" Min="2000" Max="{Binding NumValue,ElementName=NUD_DelayWebMax}" Step="1000" Margin="0,117,70,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMax" NumValue="{Binding DelayWebMax}" Min="{Binding NumValue,ElementName=NUD_DelayWebMin}" Max="30000" Step="1000" Margin="0,117,5,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+
+            <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Chờ fb xử lý GPLX (giây):" VerticalAlignment="Top"/>
+            <WpfUiControls:NumericUpDown NumValue="{Binding DelayFbCheck}" Min="10" Max="300" Step="10" Margin="0,144,5,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Right"/>
+
+            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="75" Height="20"/>
+            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,294,10,0" VerticalAlignment="Top" Width="75"/>
+            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check" HorizontalAlignment="Left" Margin="85,294,0,0" VerticalAlignment="Top" Width="75"/>
+
+        </Grid>
+
+        <ListView Grid.Column="1" Margin="5,5,5,5">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="500" Header="Log" DisplayMemberBinding="{Binding}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <Grid Grid.Row="1" Grid.Column="1">
+            <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="5,5,0,0" Grid.Row="1" TextWrapping="Wrap" Text="RentCodeKey:" VerticalAlignment="Top"/>
+            <TextBox Height="20" Margin="83,4,5,0" Text="{Binding RentCodeKey}" VerticalAlignment="Top"/>
+        </Grid>
+
     </Grid>
 </Window>

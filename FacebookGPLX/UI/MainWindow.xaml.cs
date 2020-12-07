@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -29,15 +30,20 @@ namespace FacebookGPLX.UI
   /// </summary>
   public partial class MainWindow : Window
   {
-    readonly TaskQueue<ItemQueue> taskQueue = new TaskQueue<ItemQueue>();
+    readonly TaskQueue<ItemQueue> taskQueue = new TaskQueue<ItemQueue>()
+    {
+      MaxRun = 0
+    };
     readonly MainWindowViewModel mainWindowViewModel;
 
 
     public MainWindow()
     {
+      Directory.CreateDirectory(Extensions.OutputPath);
+      Directory.CreateDirectory(Extensions.ChromeProfilePath);
       SettingData.Load();
       UserAgent.Load(Extensions.ExeFolderPath + "\\UAs.txt");
-      mainWindowViewModel = new MainWindowViewModel();
+      mainWindowViewModel = new MainWindowViewModel(this.Dispatcher);
       this.DataContext = mainWindowViewModel;
       InitializeComponent();
       taskQueue.Dispatcher = this.Dispatcher;
@@ -48,9 +54,9 @@ namespace FacebookGPLX.UI
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-      AccountDatas.Add(new AccountData() { UserName = "100056858118683", PassWord = "THmedia@8888", TwoFA = "4OFJGEBYL5XRQGFXBUUYOA7WWUFGRE4L" });
-        //Task.Factory.StartNew(Acc2, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-      }
+      //AccountDatas.Add(new AccountData() { UserName = "100056858118683", PassWord = "THmedia@8888", TwoFA = "4OFJGEBYL5XRQGFXBUUYOA7WWUFGRE4L" });
+      //Task.Factory.StartNew(Acc2, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
 
     //async void Acc1()
     //{
@@ -119,11 +125,9 @@ namespace FacebookGPLX.UI
     private void TaskQueue_OnRunComplete()
     {
       ItemQueue.ResultFailed?.Close();
-      ItemQueue.ResultNotFound?.Close();
       ItemQueue.ResultSuccess?.Close();
       ItemQueue.ResultError?.Close();
       ItemQueue.ResultFailed = null;
-      ItemQueue.ResultNotFound = null;
       ItemQueue.ResultSuccess = null;
       ItemQueue.ResultError = null;
     }
@@ -145,25 +149,61 @@ namespace FacebookGPLX.UI
     }
     private void BT_Run_Click(object sender, RoutedEventArgs e)
     {
-      taskQueue.ShutDown();
-      ItemQueue.AccountsQueue.Clear();
-      AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
-      for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
+      if(taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
       {
-        ItemQueue itemQueue = new ItemQueue("Profile_" + i, LogCallback);
-        taskQueue.Add(itemQueue);
+        ItemQueue.RunFlag = true;
+        ItemQueue.AccountsQueue.Clear();
+        AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
+        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
+        for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
+        {
+          ItemQueue itemQueue = new ItemQueue("Profile_" + i, mainWindowViewModel.LogCallback);
+          taskQueue.Add(itemQueue);
+        }
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
+        taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
-      ItemQueue.ResultFailed = new System.IO.StreamWriter(Extensions.ExeFolderPath + "\\result_failed.txt",true);
-      ItemQueue.ResultNotFound = new System.IO.StreamWriter(Extensions.ExeFolderPath + "\\result_notFound.txt", true);
-      ItemQueue.ResultSuccess = new System.IO.StreamWriter(Extensions.ExeFolderPath + "\\result_success.txt", true);
-      ItemQueue.ResultError = new System.IO.StreamWriter(Extensions.ExeFolderPath + "\\result_error.txt", true);
-      taskQueue.MaxRun = mainWindowViewModel.MaxRun;
     }
 
     #endregion
-    void LogCallback(string text)
+
+    readonly List<string> ProxysData = new List<string>();
+    private void BT_LoadProxy_Click(object sender, RoutedEventArgs e)
     {
-      Console.WriteLine(text);
+      OpenFileDialog openFileDialog = new OpenFileDialog();
+      openFileDialog.InitialDirectory = Extensions.ExeFolderPath;
+      openFileDialog.Filter = "txt file|*.txt|all file|*.*";
+      if (openFileDialog.ShowDialog() == true)
+      {
+        ProxysData.Clear();
+        ProxysData.AddRange(File.ReadAllLines(openFileDialog.FileName).Where(x => !string.IsNullOrWhiteSpace(x)));
+        mainWindowViewModel.ProxyCount = ProxysData.Count;
+      }
+    }
+
+    private void BT_Stop_Click(object sender, RoutedEventArgs e)
+    {
+      taskQueue.ShutDown();
+    }
+
+    private void BT_Check_Click(object sender, RoutedEventArgs e)
+    {
+      if (taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
+      {
+        ItemQueue.RunFlag = false;
+        ItemQueue.AccountsQueue.Clear();
+        AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
+        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
+        for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
+        {
+          ItemQueue itemQueue = new ItemQueue("Profile_" + i, mainWindowViewModel.LogCallback);
+          taskQueue.Add(itemQueue);
+        }
+        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_failed.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_success.txt", true);
+        taskQueue.MaxRun = mainWindowViewModel.MaxRun;
+      }
     }
   }
 }

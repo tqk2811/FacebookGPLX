@@ -46,38 +46,46 @@ namespace FacebookGPLX
       options.AddArguments("--user-agent=" + ua);
       options.AddArguments("--disable-notifications");
       options.AddArguments("--disable-web-security");
+      options.AddArguments("--disable-blink-features");
+      options.AddArguments("--disable-blink-features=AutomationControlled");
+      options.AddArguments("--disable-infobars");
+      options.AddArguments("--ignore-certificate-errors");
       options.AddArguments("--allow-running-insecure-content");
       options.AddArguments("--user-data-dir=" + ProfilePath);
+      options.AddAdditionalCapability("useAutomationExtension", false);
+      options.AddExcludedArgument("enable-automation");
       if (!string.IsNullOrEmpty(extensionPath)) options.AddExtensions(extensionPath);
       if (!string.IsNullOrEmpty(proxy)) options.AddArguments("--proxy-server=" + string.Format("http://{0}", proxy));
       return options;
     }
 
-    void DelayWeb() => Delay(5000, 7000);
-    void DelayStep() => Delay(1000, 2000);
+    void DelayWeb() => Delay(SettingData.Setting.DelayWebMin, SettingData.Setting.DelayWebMax);
+    void DelayStep() => Delay(SettingData.Setting.DelayStepMin, SettingData.Setting.DelayStepMax);
     public void WriteLog(string log)
     {
       log = ProfileName + ": " + log;
       LogEvent?.Invoke(log);
-      //Console.WriteLine(log);
     }
 
     public void RunLogin(AccountData accountData)
     {
       if(IsOpenChrome)
       {
+        WriteLog("Start Run Login");
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com");
         DelayWeb();
 
         var eles = chromeDriver.FindElements(By.Id("email"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id email");
         eles.First().Click();
+        WriteLog("UserName: " + accountData.UserName);
         eles.First().SendKeys(accountData.UserName);
         DelayStep();
 
         eles = chromeDriver.FindElements(By.Id("pass"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id pass");
         eles.First().Click();
+        WriteLog("PassWord: " + accountData.PassWord);
         eles.First().SendKeys(accountData.PassWord);
         DelayStep();
 
@@ -87,13 +95,13 @@ namespace FacebookGPLX
         DelayWeb();
 
         TwoFactorAuthNet.TwoFactorAuth twoFactorAuth = new TwoFactorAuthNet.TwoFactorAuth();
-        twoFactorAuth.GetCode(accountData.TwoFA);
+        string facode = twoFactorAuth.GetCode(accountData.TwoFA);
 
         eles = chromeDriver.FindElements(By.Id("approvals_code"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id approvals_code");
         eles.First().Click();
-        eles.First().SendKeys(twoFactorAuth.GetCode(accountData.TwoFA));
-
+        WriteLog("2FA: " + facode);
+        eles.First().SendKeys(facode);
 
         eles = chromeDriver.FindElements(By.Id("checkpointSubmitButton"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id checkpointSubmitButton");
@@ -106,19 +114,16 @@ namespace FacebookGPLX
       }
     }
 
-    public AdsResult RunAdsManager(string uid,string imagePath, Task task,string proxy = null)
+    public void RunAdsManager(string imagePath, Task task)
     {
       if(IsOpenChrome)
       {
-        chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/" + uid);
+        WriteLog("Check Account Quality");
+        chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
         DelayWeb();
 
         var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
-        if (eles.Count == 0)
-        {
-          WriteLog("Không thấy nút kháng");
-          return AdsResult.NotFound;
-        }
+        if (eles.Count == 0) throw new ChromeAutoException("button[target='_blank'] not found, Không tìm thấy nút kháng nghị");
         eles.First().Click();
         DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
@@ -133,23 +138,32 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
         if(eles.Count > 0)
         {
-          chromeDriver.SwitchTo().Frame(eles.First());
-
-          eles = chromeDriver.FindElements(By.ClassName("g-recaptcha"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.ClassName g-recaptcha");
-          string data_sitekey = eles.First().GetAttribute("data-sitekey");
-
-          WriteLog("Solve Captcha");
-          SolveCaptcha(data_sitekey, proxy);
-          chromeDriver.SwitchTo().ParentFrame();
+          WriteLog("Chờ giải recaptcha");
+          do
+          {
+            DelayStep();
+            eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
+          } while (eles.Count != 0);
         }
+        DelayWeb();
 
-        eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Continue']"));
-        if (eles.Count != 0)
-        {
-          eles.First().Click();
-          DelayWeb();
-        }
+        //eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
+        //if(eles.Count > 0)
+        //{
+        //  chromeDriver.SwitchTo().Frame(eles.First());
+        //  eles = chromeDriver.FindElements(By.ClassName("g-recaptcha"));
+        //  if (eles.Count == 0) throw new ChromeAutoException("FindElements By.ClassName g-recaptcha");
+        //  string data_sitekey = eles.First().GetAttribute("data-sitekey");
+        //  WriteLog("Solve Captcha");
+        //  SolveCaptcha(data_sitekey, proxy);
+        //  chromeDriver.SwitchTo().ParentFrame();
+        //}
+        //eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Continue']"));
+        //if (eles.Count != 0)
+        //{
+        //  eles.First().Click();
+        //  DelayWeb();
+        //}
 
         eles = chromeDriver.FindElements(By.CssSelector("input[name='email']"));
         if (eles.Count > 0) throw new ChromeAutoException("Bị đòi xác nhận email");
@@ -171,24 +185,36 @@ namespace FacebookGPLX
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Continue']");
         eles.First().Click();
         DelayWeb();
-        DelayWeb();
-        DelayWeb();
-        DelayWeb();
-        DelayWeb();
-        chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/" + uid);
-        DelayWeb();
 
-        if(chromeDriver.PageSource.Contains(">Account Restricted</span>"))
-          return AdsResult.Failed;
-        else return AdsResult.Success;
+        //WriteLog("Delay Chờ fb xử lý GPLX: " + SettingData.Setting.DelayFbCheck);
+        //Delay(SettingData.Setting.DelayFbCheck, SettingData.Setting.DelayFbCheck);
+
+        //chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
+        //DelayWeb();
+        ////tam giac cham than : -webkit-mask-position 0px -197px
+
+        //if (chromeDriver.PageSource.Contains(">Account Restricted</span>"))
+        //  return AdsResult.Failed;
+        //else return AdsResult.Success;
       }
       throw new ChromeAutoException("Chrome is not open");
+    }
+
+    public AdsResult Check()
+    {
+      chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
+      DelayWeb();
+      //tam giac cham than : -webkit-mask-position 0px -197px
+
+      if (chromeDriver.PageSource.Contains(">Account Restricted</span>"))
+        return AdsResult.Failed;
+      else return AdsResult.Success;
     }
 
     void SolveCaptcha(string data_sitekey,string proxy = null)
     {
       bool flag_again = false;
-      TwoCaptcha twoCaptcha = new TwoCaptcha(SettingData.Setting.TwoCaptchaKey);
+      TwoCaptcha twoCaptcha = new TwoCaptcha("");
       do
       {
         string data = twoCaptcha.RecaptchaV2(data_sitekey, chromeDriver.Url, proxy , string.IsNullOrEmpty(proxy) ? null : "HTTP").Result;
@@ -262,7 +288,7 @@ namespace FacebookGPLX
 
 
 
-      TwoCaptcha twoCaptcha = new TwoCaptcha(SettingData.Setting.TwoCaptchaKey);
+      //TwoCaptcha twoCaptcha = new TwoCaptcha(SettingData.Setting.TwoCaptchaKey);
       
       //twoCaptcha.ReCaptchaV2_old()
     }
@@ -275,7 +301,7 @@ namespace FacebookGPLX
 
       //get phone from api
       RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
-      RentCodeResult rentCodeResult = rentCode.Request(null, null, RentCode.NetworkProvider.Viettel).Result;
+      RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
 
       DelayStep();
       RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;//get phonenumber
@@ -329,6 +355,7 @@ namespace FacebookGPLX
     {
       if (IsOpenChrome)
       {
+        WriteLog("Get Access Token");
         chromeDriver.Navigate().GoToUrl("https://business.facebook.com/business_locations/?nav_source=mega_menu");
         DelayWeb();
         string html = chromeDriver.PageSource;

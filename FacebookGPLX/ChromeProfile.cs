@@ -129,12 +129,16 @@ namespace FacebookGPLX
         DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
 
+        ReloadSomethingWentWrong();
+
         eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Continue']"));
         if (eles.Count != 0)
         {
           eles.First().Click();
           DelayWeb();
         }
+
+        ReloadSomethingWentWrong();
 
         eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
         if(eles.Count > 0)
@@ -166,14 +170,20 @@ namespace FacebookGPLX
         //  DelayWeb();
         //}
 
+        ReloadSomethingWentWrong();
+
         eles = chromeDriver.FindElements(By.CssSelector("input[name='email']"));
         if (eles.Count > 0) throw new ChromeAutoException("Bị đòi xác nhận email");
 
         GetCodeFromPhone();
 
+        ReloadSomethingWentWrong();
+
         eles = chromeDriver.FindElements(By.CssSelector("input[name='email']"));
         if (eles.Count > 0) throw new ChromeAutoException("Bị đòi xác nhận email");
         //if (eles.Count == 0) throw new ChromeAutoException("FindElements By.ClassName div[aria-label='Continue']");
+
+        ReloadSomethingWentWrong();
 
         eles = chromeDriver.FindElements(By.CssSelector("input[type='file']"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[type='file']");
@@ -200,6 +210,16 @@ namespace FacebookGPLX
       }
       else throw new ChromeAutoException("Chrome is not open");
     }
+
+    void ReloadSomethingWentWrong()
+    {
+      if(chromeDriver.PageSource.Contains("Sorry, something went wrong"))
+      {
+        chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+        DelayWeb();
+      }
+    }
+
 
     public AdsResult Check()
     {

@@ -8,7 +8,7 @@
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         MinHeight="300" MinWidth="650"
-        Title="Facebook GPLX" Height="350" Width="800">
+        Title="Facebook GPLX" Height="350" Width="800" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -50,12 +50,12 @@
             <WpfUiControls:NumericUpDown NumValue="{Binding DelayFbCheck}" Min="10" Max="300" Step="10" Margin="0,144,5,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Right"/>
 
             <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="75" Height="20"/>
-            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,294,10,0" VerticalAlignment="Top" Width="75"/>
-            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check" HorizontalAlignment="Left" Margin="85,294,0,0" VerticalAlignment="Top" Width="75"/>
+            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75"/>
+            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check" HorizontalAlignment="Left" Margin="85,0,0,5" VerticalAlignment="Bottom" Width="75"/>
 
         </Grid>
 
-        <ListView Grid.Column="1" Margin="5,5,5,5">
+        <ListView Grid.Column="1" ItemsSource="{Binding Logs}" Margin="5,5,5,5">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="500" Header="Log" DisplayMemberBinding="{Binding}"/>

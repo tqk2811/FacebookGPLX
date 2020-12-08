@@ -54,6 +54,7 @@ namespace FacebookGPLX.UI
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+      //ImageHelper.DrawGPLX(null, "", "");
       //AccountDatas.Add(new AccountData() { UserName = "100056858118683", PassWord = "THmedia@8888", TwoFA = "4OFJGEBYL5XRQGFXBUUYOA7WWUFGRE4L" });
       //Task.Factory.StartNew(Acc2, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
@@ -147,26 +148,6 @@ namespace FacebookGPLX.UI
         mainWindowViewModel.AccountCount = AccountDatas.Count;
       }
     }
-    private void BT_Run_Click(object sender, RoutedEventArgs e)
-    {
-      if(taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
-      {
-        ItemQueue.RunFlag = true;
-        ItemQueue.AccountsQueue.Clear();
-        AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
-        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
-        for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
-        {
-          ItemQueue itemQueue = new ItemQueue("Profile_" + i, mainWindowViewModel.LogCallback);
-          taskQueue.Add(itemQueue);
-        }
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
-        taskQueue.MaxRun = mainWindowViewModel.MaxRun;
-      }
-    }
-
-    #endregion
 
     readonly List<string> ProxysData = new List<string>();
     private void BT_LoadProxy_Click(object sender, RoutedEventArgs e)
@@ -187,11 +168,33 @@ namespace FacebookGPLX.UI
       taskQueue.ShutDown();
     }
 
+
+    private void BT_Run_Click(object sender, RoutedEventArgs e)
+    {
+      if(taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
+      {
+        ItemQueue.RunFlag = true;
+        ItemQueue.AccountsQueue.Clear();
+        ItemQueue.ProxysQueue.Clear();
+        AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
+        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
+        for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
+        {
+          ItemQueue itemQueue = new ItemQueue("Profile_" + i, mainWindowViewModel.LogCallback);
+          taskQueue.Add(itemQueue);
+        }
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
+        taskQueue.MaxRun = mainWindowViewModel.MaxRun;
+      }
+    }
+
     private void BT_Check_Click(object sender, RoutedEventArgs e)
     {
       if (taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
       {
         ItemQueue.RunFlag = false;
+        ItemQueue.ProxysQueue.Clear();
         ItemQueue.AccountsQueue.Clear();
         AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
         ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
@@ -205,5 +208,6 @@ namespace FacebookGPLX.UI
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
+    #endregion
   }
 }

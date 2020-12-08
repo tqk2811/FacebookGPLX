@@ -39,22 +39,31 @@ namespace FacebookGPLX
 
         try
         {
+          chromeProfile.WriteLog("Reset Profile");
           chromeProfile.ResetProfileData();
+
           //string proxy = null;
-          if(ProxysQueue.Count > 0)
+          if (ProxysQueue.Count > 0)
           {
             ProxyHelper proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
             if (proxyHelper.IsLogin)//extension
             {
+              chromeProfile.WriteLog("Open chrome and login proxy by extension: " + proxyHelper.Proxy);
               string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
               ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
               chromeProfile.OpenChrome(null, ext_path);
             }
-            else chromeProfile.OpenChrome(proxyHelper.Proxy, null);//set to chrome option
-            //proxy = proxyHelper.Gen();
+            else
+            {
+              chromeProfile.WriteLog("Open chrome with proxy: " + proxyHelper.Proxy);
+              chromeProfile.OpenChrome(proxyHelper.Proxy, null);
+            }
           }
-          else chromeProfile.OpenChrome();
-
+          else
+          {
+            chromeProfile.WriteLog("Open chrome");
+            chromeProfile.OpenChrome();
+          }
           chromeProfile.RunLogin(accountData);
           string access_token = chromeProfile.GetToken();
           chromeProfile.WriteLog("Access Token: " + access_token);
@@ -72,7 +81,8 @@ namespace FacebookGPLX
             chromeProfile.WriteLog("Download & Edit Avatar");
             using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
             {
-              using (Bitmap fake = image.DrawGPLX(name, birthday)) fake.Save(imagePath, ImageFormat.Png);
+              using (Bitmap fake = image.DrawGPLX(name, birthday)) 
+                fake.Save(imagePath, ImageFormat.Png);
             }
             chromeProfile.WriteLog("Download & Edit Avatar Completed");
           }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -100,6 +110,7 @@ namespace FacebookGPLX
         }
         finally
         {
+          chromeProfile.WriteLog("Close chrome");
           chromeProfile.CloseChrome();
         }
       }

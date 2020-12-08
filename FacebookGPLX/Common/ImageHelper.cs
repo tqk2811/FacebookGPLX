@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,9 +10,13 @@ namespace FacebookGPLX.Common
 {
   public static class ImageHelper
   {
+    static readonly Random random = new Random();
     public static Bitmap DrawGPLX(this Bitmap bitMap,string Name,string DateOfBirth)
     {
-      Bitmap result = new Bitmap(Properties.Resources.GPLX);
+      var files = Directory.GetFiles(Extensions.ExeFolderPath + "\\Embryo", "*.png");
+      if (files.Length == 0) throw new Exception("Không tìm thấy phôi");
+
+      Bitmap result = (Bitmap)Bitmap.FromFile(files[random.Next(files.Length)]);
       using (Font font = new Font("Tahoma",10))
       {
         using (Graphics graphics = Graphics.FromImage(result))

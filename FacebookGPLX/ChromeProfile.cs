@@ -112,6 +112,7 @@ namespace FacebookGPLX
 
         DelayWeb();
       }
+      else throw new ChromeAutoException("Chrome is not open");
     }
 
     public void RunAdsManager(string imagePath, Task task)
@@ -168,7 +169,6 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("input[name='email']"));
         if (eles.Count > 0) throw new ChromeAutoException("Bị đòi xác nhận email");
 
-        WriteLog("Get Code From Phone Number");
         GetCodeFromPhone();
 
         eles = chromeDriver.FindElements(By.CssSelector("input[name='email']"));
@@ -178,6 +178,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("input[type='file']"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[type='file']");
         task.Wait();
+        if (task.IsFaulted) throw new ChromeAutoException("Xử lý ảnh bị lỗi: " + task.Exception.GetType().FullName + ": " + task.Exception.Message + task.Exception.StackTrace);
         eles.First().SendKeys(imagePath);
         DelayWeb();
 
@@ -197,7 +198,7 @@ namespace FacebookGPLX
         //  return AdsResult.Failed;
         //else return AdsResult.Success;
       }
-      throw new ChromeAutoException("Chrome is not open");
+      else throw new ChromeAutoException("Chrome is not open");
     }
 
     public AdsResult Check()
@@ -294,11 +295,12 @@ namespace FacebookGPLX
     }
 
 
-    public void GetCodeFromPhone()
+     void GetCodeFromPhone()
     {
       var eles = chromeDriver.FindElements(By.Name("phone"));
-      if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Name phone");
+      if (eles.Count == 0) return;
 
+      WriteLog("Get Code From Phone Number");
       //get phone from api
       RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
       RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
@@ -365,13 +367,10 @@ namespace FacebookGPLX
           int end_index = html.IndexOf('"', start_index);
           return html.Substring(start_index, end_index - start_index);
         }
+        else throw new ChromeAutoException("Token not found");
       }
-      return null;
+      else throw new ChromeAutoException("Chrome is not open");
     }
-
-
-
-
 
 
     public void OpenChrome(string proxy = null, string extensionPath = null)
@@ -384,7 +383,6 @@ namespace FacebookGPLX
     {
       if(!IsOpenChrome)
       {
-        
         if (Directory.Exists(ProfilePath)) Directory.Delete(ProfilePath, true);
         return true;
       }

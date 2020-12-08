@@ -13,7 +13,10 @@ namespace FacebookGPLX.Data
   {
     public int MaxRun { get; set; } = 1;
     //public string TwoCaptchaKey { get; set; } = "25fbc812b40b10686f4dc98105bbf62f";//"d86e5ffd18ee2fe0c74b848722d7e24e";
-    public string RentCodeKey { get; set; } = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
+    public string RentCodeKey { get; set; }
+#if DEBUG
+      = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
+#endif
     public int DelayStepMin { get; set; } = 2000;
     public int DelayStepMax { get; set; } = 3000;
     public int DelayWebMin { get; set; } = 6000;

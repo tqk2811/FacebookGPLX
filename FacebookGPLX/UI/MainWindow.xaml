@@ -49,9 +49,10 @@
             <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Chờ fb xử lý GPLX (giây):" VerticalAlignment="Top"/>
             <WpfUiControls:NumericUpDown NumValue="{Binding DelayFbCheck}" Min="10" Max="300" Step="10" Margin="0,144,5,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Right"/>
 
-            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="75" Height="20"/>
+            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,73" VerticalAlignment="Bottom" Width="155" Height="20"/>
             <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75"/>
-            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check" HorizontalAlignment="Left" Margin="85,0,0,5" VerticalAlignment="Bottom" Width="75"/>
+            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check Status Acc" HorizontalAlignment="Left" Margin="5,0,0,48" VerticalAlignment="Bottom" Width="155"/>
+            <Button x:Name="BT_StopNext" Click="BT_StopNext_Click" Content="Dừng log acc tiếp theo" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="155"/>
 
         </Grid>
 

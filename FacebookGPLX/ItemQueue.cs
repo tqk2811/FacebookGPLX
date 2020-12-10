@@ -34,18 +34,23 @@ namespace FacebookGPLX
     {
       while(true)
       {
-        AccountData accountData = AccountsQueue.Dequeue();
-        if (accountData == null) break;
-
+        AccountData accountData = null;
         try
         {
+          accountData = AccountsQueue.Dequeue();
+          if (accountData == null) break;
+#if DEBUG
+          chromeProfile.OpenChrome();
+          chromeProfile.RunAdsManager("", Task.FromResult(0), null);
+          return;
+#endif
           chromeProfile.WriteLog("Reset Profile");
           chromeProfile.ResetProfileData();
 
-          //string proxy = null;
+          ProxyHelper proxyHelper = null;
           if (ProxysQueue.Count > 0)
           {
-            ProxyHelper proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
+            proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
             if (proxyHelper.IsLogin)//extension
             {
               chromeProfile.WriteLog("Open chrome and login proxy by extension: " + proxyHelper.Proxy);
@@ -64,30 +69,39 @@ namespace FacebookGPLX
             chromeProfile.WriteLog("Open chrome");
             chromeProfile.OpenChrome();
           }
+
           chromeProfile.RunLogin(accountData);
           string access_token = chromeProfile.GetToken();
           chromeProfile.WriteLog("Access Token: " + access_token);
 
-          FacebookApi facebookApi = new FacebookApi();
-          string userinfo = facebookApi.UserInfo(access_token, "birthday,name,id").Result;
-          dynamic json = JsonConvert.DeserializeObject(userinfo);
-          string birthday = json.birthday;
-          string name = json.name;
-          string id = json.id;
 
           string imagePath = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".png";
+          string birthday = null;
+          string name = null;
+          string id = null;
           Task task = Task.Factory.StartNew(() =>
           {
             chromeProfile.WriteLog("Download & Edit Avatar");
+
+            FacebookApi facebookApi = new FacebookApi();
+            string userinfo = facebookApi.UserInfo(access_token, "birthday,name,id").Result;
+            dynamic json = JsonConvert.DeserializeObject(userinfo);
+            id = json.id;
+            birthday = json.birthday;
+            name = json.name;
+
             using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
             {
-              using (Bitmap fake = image.DrawGPLX(name, birthday)) 
+              using (Bitmap fake = image.DrawGPLX(name, birthday))
+              {
                 fake.Save(imagePath, ImageFormat.Png);
+              }
             }
             chromeProfile.WriteLog("Download & Edit Avatar Completed");
           }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-          chromeProfile.RunAdsManager(imagePath, task);
+          chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
+          File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
           ResultSuccess?.WriteLine(accountData);
           ResultSuccess?.Flush();
         }
@@ -97,14 +111,16 @@ namespace FacebookGPLX
         }
         catch(ChromeAutoException cae)
         {
-          ResultError?.WriteLine(accountData + " -> " + cae.Message);
+          chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}_{accountData?.UserName}.html");
+          ResultError?.WriteLine(accountData + "| -> " + cae.Message);
           ResultError?.Flush();
           chromeProfile.WriteLog("ChromeAutoException:" + cae.Message);
         }
         catch(Exception ex)
         {
+          chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}_{accountData?.UserName}.html");
           if (ex is AggregateException ae) ex = ae.InnerException;
-          ResultError?.WriteLine(accountData + " -> " + ex.Message);
+          ResultError?.WriteLine(accountData + "| -> " + ex.Message);
           ResultError?.Flush();
           chromeProfile.WriteLog(ex.GetType().FullName+ ":" + ex.Message + ex.StackTrace);
         }
@@ -181,7 +197,7 @@ namespace FacebookGPLX
       }
     }
 
-    #region IQueue
+#region IQueue
     public bool IsPrioritize => false;
     public bool ReQueue => false;
     public void Cancel() => chromeProfile.Stop();
@@ -196,6 +212,6 @@ namespace FacebookGPLX
       if (RunFlag) return Task.Factory.StartNew(Work, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
       else return Task.Factory.StartNew(WorkCheck, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
-    #endregion
+#endregion
   }
 }

@@ -12,11 +12,19 @@ namespace FacebookGPLX.Data
   class SettingData
   {
     public int MaxRun { get; set; } = 1;
-    //public string TwoCaptchaKey { get; set; } = "25fbc812b40b10686f4dc98105bbf62f";//"d86e5ffd18ee2fe0c74b848722d7e24e";
+    public string TwoCaptchaKey { get; set; }
+#if DEBUG
+      = "25fbc812b40b10686f4dc98105bbf62f";
+#endif
     public string RentCodeKey { get; set; }
 #if DEBUG
       = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
 #endif
+    public string AntiCaptchaKey { get; set; }
+#if DEBUG
+      = "a9cf89a12e6d3aedbc90bde5fffc86b3";
+#endif
+
     public int DelayStepMin { get; set; } = 2000;
     public int DelayStepMax { get; set; } = 3000;
     public int DelayWebMin { get; set; } = 6000;

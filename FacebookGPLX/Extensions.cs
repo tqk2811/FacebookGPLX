@@ -12,5 +12,7 @@ namespace FacebookGPLX
     public static string ChromeDrivePath { get; } = ExeFolderPath + "\\ChromeDrive";
     public static string ChromeProfilePath { get; } = ExeFolderPath + "\\Profiles";
     public static string OutputPath { get; } = ExeFolderPath + "\\Output";
+    public static string ImageSuccess { get; } = OutputPath + "\\ImageSuccess";
+    public static string DebugData { get; } = ExeFolderPath + "\\DebugData";
   }
 }

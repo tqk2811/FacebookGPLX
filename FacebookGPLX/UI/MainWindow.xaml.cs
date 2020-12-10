@@ -41,6 +41,7 @@ namespace FacebookGPLX.UI
     {
       Directory.CreateDirectory(Extensions.OutputPath);
       Directory.CreateDirectory(Extensions.ChromeProfilePath);
+      Directory.CreateDirectory(Extensions.ImageSuccess);
       SettingData.Load();
       UserAgent.Load(Extensions.ExeFolderPath + "\\UAs.txt");
       mainWindowViewModel = new MainWindowViewModel(this.Dispatcher);
@@ -54,9 +55,22 @@ namespace FacebookGPLX.UI
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
-      //ImageHelper.DrawGPLX(null, "", "");
-      //AccountDatas.Add(new AccountData() { UserName = "100056858118683", PassWord = "THmedia@8888", TwoFA = "4OFJGEBYL5XRQGFXBUUYOA7WWUFGRE4L" });
-      //Task.Factory.StartNew(Acc2, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+      //ChromeProfile chromeProfile = new ChromeProfile("Test");
+      //chromeProfile.TestCaptcha();
+
+      //AccountDatas.Add(new AccountData() { UserName = "100056998035708", PassWord = "THmedia@8888", TwoFA = "6Y6GJOEPKVHZ7E6OQ3PMEPFNZDZ54QS4" });//acc bi checkpoint
+      //AccountDatas.Add(new AccountData() { UserName = "100056944147952", PassWord = "THmedia@8888", TwoFA = "T7YWYAXWTQBIAAKHC3JK2Z66SME3LDJX" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100057260070746", PassWord = "THmedia@8888", TwoFA = "SO6IOLMOEU6OHWLGPMHSWHHDL4SK3M7P" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100056844197022", PassWord = "THmedia@8888", TwoFA = "WSC7SNSSITUHHY6KW7HKQYJ4D56MGFG5" });//email
+      //AccountDatas.Add(new AccountData() { UserName = "100056744687657", PassWord = "THmedia@8888", TwoFA = "324EJVUN5JLFDPF6ULLKZH7CADEVSABH" });//den phone
+      //AccountDatas.Add(new AccountData() { UserName = "100056858118683", PassWord = "THmedia@8888", TwoFA = "4OFJGEBYL5XRQGFXBUUYOA7WWUFGRE4L" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100057003068751", PassWord = "THmedia@8888", TwoFA = "I7JSBVRE34WVH2OHM5SWYPL2UDO3FWU7" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100056762778410", PassWord = "THmedia@8888", TwoFA = "DXTJY2N3G7XXBN67FFH5PBEUZXCJVFOJ" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100056873588504", PassWord = "THmedia@8888", TwoFA = "632CZQ6QEMCVSMGNELOQSVE4Y534H6BQ" });//email
+      //AccountDatas.Add(new AccountData() { UserName = "100056964578087", PassWord = "THmedia@8888", TwoFA = "JBTJW2BJSJZMJLTMDTEANMMZWFBSOAJQ" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100056777286563", PassWord = "THmedia@8888", TwoFA = "5KB5A5CSPISJVS5LPBBZZEZ4JVGIBWCL" });//khang nghi thanh cong
+      AccountDatas.Add(new AccountData() { UserName = "100055071842022", PassWord = "THmedia@8386", TwoFA = "RKALCRLC3SUZCIVIAZ6I5SZTPWBJEOIV" });
+      mainWindowViewModel.AccountCount = AccountDatas.Count;
     }
 
     //async void Acc1()
@@ -209,5 +223,10 @@ namespace FacebookGPLX.UI
       }
     }
     #endregion
+
+    private void BT_StopNext_Click(object sender, RoutedEventArgs e)
+    {
+      ItemQueue.AccountsQueue.Clear();
+    }
   }
 }

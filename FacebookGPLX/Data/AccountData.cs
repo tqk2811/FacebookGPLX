@@ -22,7 +22,7 @@ namespace FacebookGPLX.Data
         foreach(var line in File.ReadAllLines(filePath))
         {
           var line_data = line.Split('|');
-          if(line_data.Length == 3)
+          if(line_data.Length >= 3)
           {
             accountDatas.Add(new AccountData()
             {

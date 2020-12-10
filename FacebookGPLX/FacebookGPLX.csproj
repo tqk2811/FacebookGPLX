@@ -8,6 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>FacebookGPLX</RootNamespace>
     <AssemblyName>FacebookGPLX</AssemblyName>
+    <LangVersion>8.0</LangVersion>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -37,6 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KAutoHelper">
+      <HintPath>..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\KAutoHelper.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialDesignColors">
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\MaterialDesignColors.dll</HintPath>
     </Reference>
@@ -46,6 +50,9 @@
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.User32">
+      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.User32.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />

@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -94,10 +96,11 @@ namespace FacebookGPLX
               id = json.id;
               birthday = json.birthday;
               name = json.name;
+              DateTime dateTime = DateTime.ParseExact(birthday, "MM/dd/yyyy", CultureInfo.CurrentCulture);              
 
               using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
               {
-                using (Bitmap fake = image.DrawGPLX(name, birthday))
+                using (Bitmap fake = image.DrawGPLX(name, dateTime.ToString("dd/MM/yyyy")))
                 {
                   fake.Save(imagePath, ImageFormat.Png);
                 }
@@ -105,10 +108,10 @@ namespace FacebookGPLX
               chromeProfile.WriteLog("Download & Edit Avatar Completed");
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
-            File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
+            chromeProfile.RunAdsManager(imagePath, task, proxyHelper);            
             ResultSuccess?.WriteLine(accountData);
-            ResultSuccess?.Flush();
+            ResultSuccess?.Flush(); 
+            File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
           }
           catch (OperationCanceledException)
           {

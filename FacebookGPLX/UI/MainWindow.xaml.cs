@@ -76,7 +76,7 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100058850012762", PassWord = "THmedia@8386", TwoFA = "DCTKJCN3AS3OW4ZAIFRYMJCZC3XGBP4K" });//khang nghi thanh cong
       //AccountDatas.Add(new AccountData() { UserName = "100055013798404", PassWord = "THmedia@1102", TwoFA = "IVJK3MXYHXV5E3CK4HOB4QQKWJYVNOCJ" });//ko tim thay nut khang
       //AccountDatas.Add(new AccountData() { UserName = "100055194077117", PassWord = "THmedia@1102", TwoFA = "FURCC74PVQKETIQ5DVNNGLEZK2DILICN" });//acc bi checkpoint
-      //AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//language not english
+      AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//language not english
       //AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//language not english
       //mainWindowViewModel.AccountCount = AccountDatas.Count;
       //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
@@ -174,6 +174,7 @@ namespace FacebookGPLX.UI
         }
         ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_failed.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_success.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_error.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }

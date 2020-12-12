@@ -215,7 +215,7 @@ namespace FacebookGPLX
       DelayWeb();
       //tam giac cham than : -webkit-mask-position 0px -197px
 
-      if (chromeDriver.PageSource.Contains(">Account Restricted</span>"))
+      if (chromeDriver.FindElements(By.CssSelector("div[class='jwy3ehce'][style*='0px -292px;']")).Count == 0)
         return AdsResult.Failed;
       else return AdsResult.Success;
     }
@@ -242,7 +242,7 @@ namespace FacebookGPLX
     public void OpenChrome(string proxy = null, string extensionPath = null)
     {
       OpenChrome(InitChromeOptions(proxy, extensionPath));
-      chromeDriver.Manage().Window.Size = new Size(1366, 900);
+      chromeDriver.Manage().Window.Size = new Size(800, 500);
 #if DEBUG
       chromeDriver.Manage().Window.Position = new Point(0, 0);
 #endif

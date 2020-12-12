@@ -12,7 +12,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="58"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -46,8 +46,8 @@
             <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMin" NumValue="{Binding DelayWebMin}" Min="2000" Max="{Binding NumValue,ElementName=NUD_DelayWebMax}" Step="1000" Margin="0,117,70,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
             <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMax" NumValue="{Binding DelayWebMax}" Min="{Binding NumValue,ElementName=NUD_DelayWebMin}" Max="30000" Step="1000" Margin="0,117,5,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Chờ fb xử lý GPLX (giây):" VerticalAlignment="Top"/>
-            <WpfUiControls:NumericUpDown NumValue="{Binding DelayFbCheck}" Min="10" Max="300" Step="10" Margin="0,144,5,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Right"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Số lần thử lại:" VerticalAlignment="Top"/>
+            <WpfUiControls:NumericUpDown NumValue="{Binding ReTryCount}" Min="0" Max="20" Step="1" Margin="120,144,0,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Left"/>
 
             <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,73" VerticalAlignment="Bottom" Width="155" Height="20"/>
             <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75"/>
@@ -65,8 +65,10 @@
         </ListView>
 
         <Grid Grid.Row="1" Grid.Column="1">
-            <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="5,5,0,0" Grid.Row="1" TextWrapping="Wrap" Text="RentCodeKey:" VerticalAlignment="Top"/>
-            <TextBox Height="20" Margin="83,4,5,0" Text="{Binding RentCodeKey}" VerticalAlignment="Top"/>
+            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,9" TextWrapping="Wrap" Text="RentCodeKey:" VerticalAlignment="Bottom"/>
+            <TextBox Height="20" Margin="84,0,5,6" Text="{Binding RentCodeKey}" VerticalAlignment="Bottom"/>
+            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,35" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Bottom"/>
+            <TextBox Height="23" Margin="84,0,5,31" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Bottom"/>
         </Grid>
 
     </Grid>

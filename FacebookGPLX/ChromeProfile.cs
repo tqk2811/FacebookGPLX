@@ -4,9 +4,9 @@ using KAutoHelper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
-using PInvoke;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -99,6 +99,20 @@ namespace FacebookGPLX
         eles.First().Click();
         DelayWeb();
 
+        //eles = chromeDriver.FindElements(By.Id("pass"));
+        //if (eles.Count > 0)
+        //{
+        //  eles.First().Click();
+        //  WriteLog("PassWord: " + accountData.PassWord);
+        //  eles.First().SendKeys(accountData.PassWord);
+        //  DelayStep();
+
+        //  eles = chromeDriver.FindElements(By.Id("loginbutton"));
+        //  if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id loginbutton");
+        //  eles.First().Click();
+        //  DelayWeb();
+        //}
+        
         TwoFactorAuthNet.TwoFactorAuth twoFactorAuth = new TwoFactorAuthNet.TwoFactorAuth();
         string facode = twoFactorAuth.GetCode(accountData.TwoFA);
 
@@ -137,6 +151,20 @@ namespace FacebookGPLX
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[This was me]']"));
+        if (eles.Count > 0)
+        {
+          eles.First().Click();
+          DelayWeb();
+        }
+
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        if (eles.Count > 0)
+        {
+          eles.First().Click();
+          DelayWeb();
+        }
+
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
@@ -235,11 +263,9 @@ namespace FacebookGPLX
 
 
 
-
-
     void ClickContinue()
     {
-      var eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Continue']"));
+      var eles = chromeDriver.FindElements(By.CssSelector("div[role='button']"));
       if (eles.Count != 0)
       {
         try
@@ -269,37 +295,29 @@ namespace FacebookGPLX
       var eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
       if (eles.Count > 0)
       {
-#if DEBUG
-        ResolveCaptcha_Old(eles.First());
-#else
-        WaitSolveCaptcha();
-#endif
+        ResolveCaptcha_New(eles.First());
+        ClickContinue();
       }
     }
 
     void GetOtpSms()
     {
       var eles = chromeDriver.FindElements(By.Name("phone"));
-      if (eles.Count >= 0)
+      if (eles.Count > 0)
       {
         WriteLog("Get Code From Phone Number");
-        int phoneTry = 3;
+        int phoneTry = 0;
         //get phone from api
         RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
-        while (true)
+        while (phoneTry++ < SettingData.Setting.ReTryCount)
         {
           RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;          
           DelayWeb();
           RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;//get phonenumber
           if (!rentCodeCheckOrderResults.Success)
           {
-            if (phoneTry-- == 0) throw new ChromeAutoException("RentCode Phone Number Failed: " + rentCodeCheckOrderResults.ToString());
-            else
-            {
-              chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
-              DelayWeb();
-              continue;
-            }
+            if (phoneTry == SettingData.Setting.ReTryCount) break;
+            else continue;
           }
 
           string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber.Substring(1);
@@ -334,15 +352,10 @@ namespace FacebookGPLX
           }
           if (string.IsNullOrEmpty(code))
           {
-            if(phoneTry-- == 0) throw new ChromeAutoException("Get code sms failed");
-            else
-            {
-              chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
-              DelayWeb();
-              continue;
-            }
+            chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+            DelayWeb();
+            continue;
           }
-
 
           eles = chromeDriver.FindElements(By.CssSelector("input[autocomplete='one-time-code']"));
           if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[autocomplete='one-time-code']");
@@ -355,6 +368,7 @@ namespace FacebookGPLX
           DelayWeb();
           return;
         }
+        throw new ChromeAutoException($"RentCode Lấy sms thất bại với {phoneTry} lần thử");
       }
     }
 
@@ -362,145 +376,45 @@ namespace FacebookGPLX
     {
       var eles = chromeDriver.FindElements(By.CssSelector("input[type='file']"));
       if (eles.Count == 0) return false;
+      WriteLog("UploadImageFile");
       task.Wait();
       if (task.IsFaulted) throw new ChromeAutoException("Xử lý ảnh bị lỗi: " + task.Exception.GetType().FullName + ": " + task.Exception.Message + task.Exception.StackTrace);
       eles.First().SendKeys(imagePath);
+      WriteLog("Upload Image: " + imagePath);
       DelayWeb();
       return true;
     }
 
-
-
-
-    void WaitSolveCaptcha()
+    void ResolveCaptcha_New(IWebElement iframe)
     {
-      while(true)
-      {
-        var eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
-        if (eles.Count > 0) DelayStep();
-        else
-        {
-          DelayWeb();
-          break;
-        }
-      }
-    }
-
-    static readonly object _lock = new object();
-    void ResolveCaptcha_Old_1(IWebElement iframe)
-    {
-      var guid = Guid.NewGuid();
-      chromeDriver.ExecuteScript($"document.title ='{guid.ToString()}'");
-      Delay(1000, 1000);
-      var process = System.Diagnostics.Process.GetProcessesByName("chrome").FirstOrDefault(p => p.MainWindowTitle.Contains(guid.ToString()));
-      if (process == null) throw new ChromeAutoException("Can't find process chrome");
-      IntPtr handle = process.MainWindowHandle;
-
-      User32.ShowWindow(handle, User32.WindowShowStyle.SW_SHOW);
-      AutoControl.MouseClick(AutoControl.GetGlobalPoint(handle, 430, 298));
-      DelayStep();
-
-      using MemoryStream memoryStream = new MemoryStream(chromeDriver.GetScreenshot().AsByteArray);
-      Bitmap bitmap = (Bitmap)Bitmap.FromStream(memoryStream);
-      bitmap.Save("D:\\chrome.png");
-      using Bitmap q = bitmap.CropImage(new Rectangle() { X = 454, Y = 187, Width = 286, Height = 115 });
-      q.Save("D:\\q.png");
-      using Bitmap i = bitmap.CropImage(new Rectangle() { X = 454, Y = 320, Width = 292, Height = 292 });
-      i.Save("D:\\i.png");
-      TwoCaptcha twoCaptcha = new TwoCaptcha(SettingData.Setting.TwoCaptchaKey);
-      var data = twoCaptcha.ReCaptchaV2_old(i, q, 4, 4).Result;
-      if (data.StartsWith("OK|")) data = data.Substring(3);
-      else throw new Exception("");
-
-      do
-      {
-        var result = twoCaptcha.GetResponseJson(data).Result;
-        //result.
-      }
-      while (true);
-
-
-
-      //var image = KAutoHelper.CaptureHelper.CaptureWindow(handle);
-      //image.Save("D:\\test.png",ImageFormat.Png);
-
-    }
-
-    void ResolveCaptcha_Old(IWebElement iframe)
-    {
+      //string cookies = string.Join(";", chromeDriver.Manage().Cookies.AllCookies.Where(x => x.Domain.Contains(".facebook.com")).Select(x => $"{x.Name}:{x.Value}"));
       chromeDriver.SwitchTo().Frame(iframe);
-      var Iframe_anchor = chromeDriver.FindElement(By.CssSelector("iframe[src*='https://www.google.com/recaptcha/api2/anchor']"));
-      var Iframe_bframe = chromeDriver.FindElement(By.CssSelector("iframe[src*='https://www.google.com/recaptcha/api2/bframe']"));
-      chromeDriver.SwitchTo().Frame(Iframe_anchor);
-      chromeDriver.FindElement(By.ClassName("recaptcha-checkbox")).Click();
-      DelayStep();
-      chromeDriver.SwitchTo().ParentFrame();
-
-      chromeDriver.SwitchTo().Frame(Iframe_bframe);
-      while(chromeDriver.FindElements(By.CssSelector("span[class*='recaptcha-checkbox'][aria-checked='false']")).Count > 0) SolveStep();
-      chromeDriver.SwitchTo().ParentFrame();
-
-      chromeDriver.SwitchTo().ParentFrame();
-    }
-
-
-    void SolveStep()
-    {
-      using MemoryStream memoryStream = new MemoryStream(chromeDriver.GetScreenshot().AsByteArray);
-      Bitmap bitmap = (Bitmap)Bitmap.FromStream(memoryStream);
-      bitmap.Save("D:\\chrome.png");
-      var instructions = chromeDriver.FindElement(By.ClassName("rc-imageselect-instructions"));
-      var challenge = chromeDriver.FindElement(By.ClassName("rc-imageselect-challenge"));
-      var tds = chromeDriver.FindElements(By.TagName("tr"));
-      using Bitmap i = bitmap.CropImage(new Rectangle()
-      {
-        X = instructions.Location.X + 447,
-        Y = instructions.Location.Y + 196,
-        Width = instructions.Size.Width,
-        Height = instructions.Size.Height
-      });
-      using Bitmap c = bitmap.CropImage(new Rectangle()
-      {
-        X = challenge.Location.X + 447,
-        Y = challenge.Location.Y + 196,
-        Width = challenge.Size.Width,
-        Height = challenge.Size.Height
-      });
-      i.Save("D:\\i.png");
-      c.Save("D:\\c.png");
-
+      var eles = chromeDriver.FindElements(By.CssSelector("div[class*='g-recaptcha']"));
+      if (eles.Count == 0) throw new Exception();
+      string data_sitekey = eles.First().GetAttribute("data-sitekey");
+      
       TwoCaptcha twoCaptcha = new TwoCaptcha(SettingData.Setting.TwoCaptchaKey);
-      string result = TwoCaptchaSolve(twoCaptcha, c, i, tds.Count);
-
-      //click
-
-
-
-
-      chromeDriver.FindElement(By.Id("recaptcha-verify-button")).Click();
-    }
-
-
-    string TwoCaptchaSolve(TwoCaptcha twoCaptcha,Bitmap c,Bitmap i,int size)
-    {
-      var data = twoCaptcha.ReCaptchaV2_old(c, i, size, size).Result;
-      if (data.StartsWith("OK|")) data = data.Substring(3);
-      else throw new Exception(data);
-
-      while (true)
+      int retry = 0;
+      while (retry++ < SettingData.Setting.ReTryCount)
       {
-        TwoCaptchaResponse.Wait(tokenSource.Token);
-        var result = twoCaptcha.GetResponseJson(data).Result;
-        switch(result.CheckState())
+        string data = twoCaptcha.RecaptchaV2(data_sitekey, "https://attachment.fbsbx.com/captcha/recaptcha/iframe/").Result;
+        if (data.StartsWith("OK|"))
         {
-          case TwoCaptchaState.Success: 
-            return result.request;
-          case TwoCaptchaState.NotReady: 
+          var result = twoCaptcha.WaitResponseJsonCompleted(data.Substring(3), tokenSource.Token).Result;
+          if (result.CheckState() == TwoCaptchaState.Success)
+          {
+            chromeDriver.ExecuteScript($"document.getElementById('g-recaptcha-response').innerHTML='{result.request}';successCallback('{result.request}');");
+            chromeDriver.SwitchTo().ParentFrame();
+            return;
+          }
+          else
+          {
+            WriteLog("TwoCaptcha Failed, Retry:" + retry);
             continue;
-          case TwoCaptchaState.Error: 
-            throw new Exception(result.request);
+          }
         }
       }
+      throw new ChromeAutoException($"TwoCaptcha Thất bại với {retry} lần thử");
     }
   }
 }

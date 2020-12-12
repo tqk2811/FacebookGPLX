@@ -20,16 +20,12 @@ namespace FacebookGPLX.Data
 #if DEBUG
       = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
 #endif
-    public string AntiCaptchaKey { get; set; }
-#if DEBUG
-      = "a9cf89a12e6d3aedbc90bde5fffc86b3";
-#endif
 
     public int DelayStepMin { get; set; } = 2000;
     public int DelayStepMax { get; set; } = 3000;
     public int DelayWebMin { get; set; } = 6000;
     public int DelayWebMax { get; set; } = 8000;
-    public int DelayFbCheck { get; set; } = 120;
+    public int ReTryCount { get; set; } = 5;
 
 
     static readonly string SettingPath = Extensions.ExeFolderPath + "\\Setting.json";

@@ -39,6 +39,9 @@ namespace FacebookGPLX.UI
 
     public MainWindow()
     {
+      DateTime dateTime = new DateTime(2021, 1, 1);
+      if (DateTime.Now > dateTime) throw new Exception("");
+
       Directory.CreateDirectory(Extensions.OutputPath);
       Directory.CreateDirectory(Extensions.ChromeProfilePath);
       Directory.CreateDirectory(Extensions.ImageSuccess);
@@ -69,66 +72,16 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100056873588504", PassWord = "THmedia@8888", TwoFA = "632CZQ6QEMCVSMGNELOQSVE4Y534H6BQ" });//email
       //AccountDatas.Add(new AccountData() { UserName = "100056964578087", PassWord = "THmedia@8888", TwoFA = "JBTJW2BJSJZMJLTMDTEANMMZWFBSOAJQ" });//khang nghi thanh cong
       //AccountDatas.Add(new AccountData() { UserName = "100056777286563", PassWord = "THmedia@8888", TwoFA = "5KB5A5CSPISJVS5LPBBZZEZ4JVGIBWCL" });//khang nghi thanh cong
-      AccountDatas.Add(new AccountData() { UserName = "100055071842022", PassWord = "THmedia@8386", TwoFA = "RKALCRLC3SUZCIVIAZ6I5SZTPWBJEOIV" });
-      mainWindowViewModel.AccountCount = AccountDatas.Count;
+      //AccountDatas.Add(new AccountData() { UserName = "100055071842022", PassWord = "THmedia@8386", TwoFA = "RKALCRLC3SUZCIVIAZ6I5SZTPWBJEOIV" });
+      //AccountDatas.Add(new AccountData() { UserName = "100058850012762", PassWord = "THmedia@8386", TwoFA = "DCTKJCN3AS3OW4ZAIFRYMJCZC3XGBP4K" });//khang nghi thanh cong
+      //AccountDatas.Add(new AccountData() { UserName = "100055013798404", PassWord = "THmedia@1102", TwoFA = "IVJK3MXYHXV5E3CK4HOB4QQKWJYVNOCJ" });//ko tim thay nut khang
+      //AccountDatas.Add(new AccountData() { UserName = "100055194077117", PassWord = "THmedia@1102", TwoFA = "FURCC74PVQKETIQ5DVNNGLEZK2DILICN" });//acc bi checkpoint
+      //AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//language not english
+      //AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//language not english
+      //mainWindowViewModel.AccountCount = AccountDatas.Count;
+      //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
+      //ImageHelper.DrawGPLX(bitmap, "Nguyễn Văn Anh", "24/12/1990").Save("D:\\test.png");
     }
-
-    //async void Acc1()
-    //{
-    //  ChromeProfile chromeProfile = new ChromeProfile("Test Profile");
-    //  //chromeProfile.ResetProfileData();
-    //  chromeProfile.OpenChrome();
-    //  //chromeProfile.RunLogin(new AccountData() { UserName= "100056998035708", PassWord= "THmedia@8888",TwoFA = "6Y6GJOEPKVHZ7E6OQ3PMEPFNZDZ54QS4" });
-    //  //string token = chromeProfile.GetToken();
-    //  //string token = "EAAGNO4a7r2wBAI96BN3TNH46ORo7Yrc1egzTtMCGvbiKZC9NhILJZCR1yRrQ4u7Icsc9xcgVc56fojAaNnQbr8mTsencXyxn2fkr7N8NRnOjXT6sZBRBIQyVqYxYhm587wfKTLQyGtrdWtqxmwGzwNFWYTW2ZB9fTBW6QnDZCL8a3jjqSMz0oPnNVGfs7zn0ZD";
-    //  FacebookApi facebookApi = new FacebookApi();
-    //  //Bitmap image = await facebookApi.PictureBitMap(token);
-    //  //Bitmap image = (Bitmap)Bitmap.FromFile("D:\\test.png");
-    //  //Bitmap image2 = image.DrawGPLX("Nguyễn Văn A","21-10-1995");
-    //  //image2.Save("D:\\out.png");
-    //  //string userinfo = await facebookApi.UserInfo(token, "birthday,name,id");
-    //  //dynamic json = JsonConvert.DeserializeObject(userinfo);
-    //  //string birthday = json.birthday;
-    //  //string name = json.name;
-    //  //string id = json.id;
-    //  //chromeProfile.RunAdsManager("100056998035708");
-    //  //chromeProfile.CloseChrome();
-    //}
-
-    //async void Acc2()
-    //{
-    //  //100056844197022
-    //  //100056762778410
-    //  //100056873588504
-    //  //100056964578087
-    //  try
-    //  {
-    //    ChromeProfile chromeProfile = new ChromeProfile("Test Profile 2");
-    //    chromeProfile.ResetProfileData();
-    //    chromeProfile.OpenChrome();
-    //    chromeProfile.RunLogin(new AccountData() { UserName = "100056777286563", PassWord = "THmedia@8888", TwoFA = "5KB5A5CSPISJVS5LPBBZZEZ4JVGIBWCL" });
-    //    string token = chromeProfile.GetToken();
-    //    //string token = "";
-    //    FacebookApi facebookApi = new FacebookApi();
-    //    Bitmap image = await facebookApi.PictureBitMap(token);
-    //    string userinfo = await facebookApi.UserInfo(token, "birthday,name,id");
-    //    dynamic json = JsonConvert.DeserializeObject(userinfo);
-    //    string birthday = json.birthday;
-    //    string name = json.name;
-    //    string id = json.id;
-    //    Bitmap fake = image.DrawGPLX(name, birthday);
-    //    fake.Save("D:\\test.png");
-    //    chromeProfile.RunAdsManager(id, "D:\\test.png", Task.FromResult(0));
-    //    //chromeProfile.CloseChrome();
-    //  }
-    //  catch (Exception ex)
-    //  {
-    //    if (ex is AggregateException ae) ex = ae.InnerException;
-    //    MessageBox.Show(ex.Message + ex.StackTrace, ex.GetType().FullName);
-    //  }
-    //}
-
-
 
     #region taskQueue
 
@@ -190,6 +143,7 @@ namespace FacebookGPLX.UI
         ItemQueue.RunFlag = true;
         ItemQueue.AccountsQueue.Clear();
         ItemQueue.ProxysQueue.Clear();
+        ItemQueue.StopLogAcc = false;
         AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
         ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
         for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
@@ -207,6 +161,7 @@ namespace FacebookGPLX.UI
     {
       if (taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
       {
+        ItemQueue.StopLogAcc = false;
         ItemQueue.RunFlag = false;
         ItemQueue.ProxysQueue.Clear();
         ItemQueue.AccountsQueue.Clear();
@@ -222,11 +177,11 @@ namespace FacebookGPLX.UI
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
-    #endregion
 
     private void BT_StopNext_Click(object sender, RoutedEventArgs e)
     {
-      ItemQueue.AccountsQueue.Clear();
+      ItemQueue.StopLogAcc = true;
     }
+    #endregion
   }
 }

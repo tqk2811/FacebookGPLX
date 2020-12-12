@@ -51,9 +51,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PInvoke.User32">
-      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.User32.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />

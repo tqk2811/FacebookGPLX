@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
 using TqkLibrary.SeleniumSupport;
@@ -18,6 +19,7 @@ namespace FacebookGPLX
   {
     public static bool RunFlag { get; set; }
     public static readonly Queue<AccountData> AccountsQueue = new Queue<AccountData>();
+    public static bool StopLogAcc { get; set; } = false;
     public static readonly Queue<string> ProxysQueue = new Queue<string>();
     public static StreamWriter ResultSuccess { get; set; }
     public static StreamWriter ResultFailed { get; set; }
@@ -32,103 +34,125 @@ namespace FacebookGPLX
 
     void Work()
     {
-      while(true)
+      try
       {
-        AccountData accountData = null;
-        try
+        while (true)
         {
-          accountData = AccountsQueue.Dequeue();
-          if (accountData == null) break;
-#if DEBUG
-          chromeProfile.OpenChrome();
-          chromeProfile.RunAdsManager("", Task.FromResult(0), null);
-          return;
-#endif
-          chromeProfile.WriteLog("Reset Profile");
-          chromeProfile.ResetProfileData();
+          AccountData accountData = null;
 
-          ProxyHelper proxyHelper = null;
-          if (ProxysQueue.Count > 0)
+          try
           {
-            proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
-            if (proxyHelper.IsLogin)//extension
+            if (StopLogAcc || AccountsQueue.Count == 0) return;
+            accountData = AccountsQueue.Dequeue();
+#if DEBUG
+            //chromeProfile.OpenChrome();
+            //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
+            //return;
+#endif
+            chromeProfile.WriteLog("Reset Profile");
+            chromeProfile.ResetProfileData();
+
+            ProxyHelper proxyHelper = null;
+            if (ProxysQueue.Count > 0)
             {
-              chromeProfile.WriteLog("Open chrome and login proxy by extension: " + proxyHelper.Proxy);
-              string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
-              ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
-              chromeProfile.OpenChrome(null, ext_path);
+              proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
+              if (proxyHelper.IsLogin)//extension
+              {
+                chromeProfile.WriteLog("Open chrome and login proxy by extension: " + proxyHelper.Proxy);
+                string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
+                ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
+                chromeProfile.OpenChrome(null, ext_path);
+              }
+              else
+              {
+                chromeProfile.WriteLog("Open chrome with proxy: " + proxyHelper.Proxy);
+                chromeProfile.OpenChrome(proxyHelper.Proxy, null);
+              }
             }
             else
             {
-              chromeProfile.WriteLog("Open chrome with proxy: " + proxyHelper.Proxy);
-              chromeProfile.OpenChrome(proxyHelper.Proxy, null);
+              chromeProfile.WriteLog("Open chrome");
+              chromeProfile.OpenChrome();
             }
-          }
-          else
-          {
-            chromeProfile.WriteLog("Open chrome");
-            chromeProfile.OpenChrome();
-          }
 
-          chromeProfile.RunLogin(accountData);
-          string access_token = chromeProfile.GetToken();
-          chromeProfile.WriteLog("Access Token: " + access_token);
+            chromeProfile.RunLogin(accountData);
+            string access_token = chromeProfile.GetToken();
+            chromeProfile.WriteLog("Access Token: " + access_token);
 
 
-          string imagePath = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".png";
-          string birthday = null;
-          string name = null;
-          string id = null;
-          Task task = Task.Factory.StartNew(() =>
-          {
-            chromeProfile.WriteLog("Download & Edit Avatar");
-
-            FacebookApi facebookApi = new FacebookApi();
-            string userinfo = facebookApi.UserInfo(access_token, "birthday,name,id").Result;
-            dynamic json = JsonConvert.DeserializeObject(userinfo);
-            id = json.id;
-            birthday = json.birthday;
-            name = json.name;
-
-            using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
+            string imagePath = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".png";
+            string birthday = null;
+            string name = null;
+            string id = null;
+            Task task = Task.Factory.StartNew(() =>
             {
-              using (Bitmap fake = image.DrawGPLX(name, birthday))
-              {
-                fake.Save(imagePath, ImageFormat.Png);
-              }
-            }
-            chromeProfile.WriteLog("Download & Edit Avatar Completed");
-          }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+              chromeProfile.WriteLog("Download & Edit Avatar");
 
-          chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
-          File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
-          ResultSuccess?.WriteLine(accountData);
-          ResultSuccess?.Flush();
+              FacebookApi facebookApi = new FacebookApi();
+              string userinfo = facebookApi.UserInfo(access_token, "birthday,name,id").Result;
+              dynamic json = JsonConvert.DeserializeObject(userinfo);
+              id = json.id;
+              birthday = json.birthday;
+              name = json.name;
+
+              using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
+              {
+                using (Bitmap fake = image.DrawGPLX(name, birthday))
+                {
+                  fake.Save(imagePath, ImageFormat.Png);
+                }
+              }
+              chromeProfile.WriteLog("Download & Edit Avatar Completed");
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
+            File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
+            ResultSuccess?.WriteLine(accountData);
+            ResultSuccess?.Flush();
+          }
+          catch (OperationCanceledException)
+          {
+            return;
+          }
+          catch (ChromeAutoException cae)
+          {
+            ResultError?.WriteLine($"{accountData}| -> {cae.Message}");
+            ResultError?.Flush();
+            chromeProfile.WriteLog("ChromeAutoException:" + cae.Message);
+            try
+            {
+              chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}_{accountData?.UserName}.html");
+            }
+            catch(Exception)
+            {
+
+            }
+          }
+          catch (Exception ex)
+          {
+            if (ex is AggregateException ae) ex = ae.InnerException;
+            ResultError?.WriteLine($"{accountData}| -> {ex.Message}");
+            ResultError?.Flush();
+            chromeProfile.WriteLog(ex.GetType().FullName + ":" + ex.Message + ex.StackTrace);
+            try
+            {
+              chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}_{accountData?.UserName}.html");
+            }
+            catch (Exception)
+            {
+
+            }
+          }
+          finally
+          {
+            chromeProfile.WriteLog("Close chrome");
+            chromeProfile.CloseChrome();
+          }
         }
-        catch(OperationCanceledException)
-        {
-          return;
-        }
-        catch(ChromeAutoException cae)
-        {
-          chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}_{accountData?.UserName}.html");
-          ResultError?.WriteLine(accountData + "| -> " + cae.Message);
-          ResultError?.Flush();
-          chromeProfile.WriteLog("ChromeAutoException:" + cae.Message);
-        }
-        catch(Exception ex)
-        {
-          chromeProfile.SaveHtml(Extensions.DebugData + $"\\{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}_{accountData?.UserName}.html");
-          if (ex is AggregateException ae) ex = ae.InnerException;
-          ResultError?.WriteLine(accountData + "| -> " + ex.Message);
-          ResultError?.Flush();
-          chromeProfile.WriteLog(ex.GetType().FullName+ ":" + ex.Message + ex.StackTrace);
-        }
-        finally
-        {
-          chromeProfile.WriteLog("Close chrome");
-          chromeProfile.CloseChrome();
-        }
+      }
+      catch(Exception ex)
+      {
+        MessageBox.Show(ex.Message + ex.StackTrace, ex.GetType().FullName);
       }
     }
 

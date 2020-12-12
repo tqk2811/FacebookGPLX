@@ -69,17 +69,21 @@ namespace FacebookGPLX.UI.ViewModels
       get { return SettingData.Setting.DelayWebMax; }
       set { SettingData.Setting.DelayWebMax = value; SettingData.Save(); NotifyPropertyChange(); }
     }
-    public int DelayFbCheck
+    public int ReTryCount
     {
-      get { return SettingData.Setting.DelayFbCheck; }
-      set { SettingData.Setting.DelayFbCheck = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return SettingData.Setting.ReTryCount; }
+      set { SettingData.Setting.ReTryCount = value; SettingData.Save(); NotifyPropertyChange(); }
     }
     public string RentCodeKey
     {
       get { return SettingData.Setting.RentCodeKey; }
       set { SettingData.Setting.RentCodeKey = value; SettingData.Save(); NotifyPropertyChange(); }
     }
-
+    public string TwoCaptchaKey
+    {
+      get { return SettingData.Setting.TwoCaptchaKey; }
+      set { SettingData.Setting.TwoCaptchaKey = value; SettingData.Save(); NotifyPropertyChange(); }
+    }
     #endregion
   }
 }

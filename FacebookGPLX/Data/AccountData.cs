@@ -9,10 +9,7 @@ namespace FacebookGPLX.Data
     public string PassWord { get; set; }
     public string TwoFA { get; set; }
 
-    public override string ToString()
-    {
-      return $"{UserName}|{PassWord}|{TwoFA}";
-    }
+    public override string ToString() => $"{UserName}|{PassWord}|{TwoFA}";
 
     public static List<AccountData> LoadFromTxt(string filePath)
     {
@@ -26,9 +23,9 @@ namespace FacebookGPLX.Data
           {
             accountDatas.Add(new AccountData()
             {
-              UserName = line_data[0],
-              PassWord = line_data[1],
-              TwoFA = line_data[2]
+              UserName = line_data[0].Trim(),
+              PassWord = line_data[1].Trim(),
+              TwoFA = line_data[2].Trim()
             });
           }  
         }

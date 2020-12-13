@@ -14,5 +14,6 @@ namespace FacebookGPLX
     public static string OutputPath { get; } = ExeFolderPath + "\\Output";
     public static string ImageSuccess { get; } = OutputPath + "\\ImageSuccess";
     public static string DebugData { get; } = ExeFolderPath + "\\DebugData";
+    public static string AdbPath { get; } = ExeFolderPath + "\\Adb\\adb.exe";
   }
 }

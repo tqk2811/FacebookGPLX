@@ -26,10 +26,16 @@ namespace FacebookGPLX
     public static StreamWriter ResultSuccess { get; set; }
     public static StreamWriter ResultFailed { get; set; }
     public static StreamWriter ResultError { get; set; }
+    public static StreamWriter ResultCheckPoint { get; set; }
+    public static List<string> AndroidDevices { get; } = new List<string>();
+
+
     readonly ChromeProfile chromeProfile;
-    public ItemQueue(string ProfileName, LogCallback logCallback)
+    readonly int profile_index = -1;
+    public ItemQueue(int profile_index, LogCallback logCallback)
     {
-      this.chromeProfile = new ChromeProfile(ProfileName);
+      this.profile_index = profile_index;
+      this.chromeProfile = new ChromeProfile("Profile_" + profile_index);
       this.chromeProfile.LogEvent += logCallback;
     }
 
@@ -44,43 +50,35 @@ namespace FacebookGPLX
 
           try
           {
-            if (StopLogAcc || AccountsQueue.Count == 0) return;
-            accountData = AccountsQueue.Dequeue();
+            lock (AccountsQueue)
+            {
+              if (StopLogAcc || AccountsQueue.Count == 0) return;
+              accountData = AccountsQueue.Dequeue();
+            }
 #if DEBUG
             //chromeProfile.OpenChrome();
             //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
             //return;
 #endif
-            chromeProfile.WriteLog("Reset Profile");
-            chromeProfile.ResetProfileData();
-
             ProxyHelper proxyHelper = null;
             if (ProxysQueue.Count > 0)
             {
               proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
               if (proxyHelper.IsLogin)//extension
               {
-                chromeProfile.WriteLog("Open chrome and login proxy by extension: " + proxyHelper.Proxy);
                 string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
                 ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
-                chromeProfile.OpenChrome(null, ext_path);
+                chromeProfile.OpenChrome(profile_index,proxyHelper.Proxy, ext_path);
               }
-              else
-              {
-                chromeProfile.WriteLog("Open chrome with proxy: " + proxyHelper.Proxy);
-                chromeProfile.OpenChrome(proxyHelper.Proxy, null);
-              }
+              else chromeProfile.OpenChrome(profile_index,proxyHelper.Proxy, null);
             }
-            else
-            {
-              chromeProfile.WriteLog("Open chrome");
-              chromeProfile.OpenChrome();
-            }
+            else chromeProfile.OpenChrome(profile_index);
+
+            //chromeProfile.ClearCookies();
 
             chromeProfile.RunLogin(accountData);
             string access_token = chromeProfile.GetToken();
             chromeProfile.WriteLog("Access Token: " + access_token);
-
 
             string imagePath = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".png";
             string birthday = null;
@@ -100,10 +98,7 @@ namespace FacebookGPLX
 
               using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
               {
-                using (Bitmap fake = image.DrawGPLX(name, dateTime.ToString("dd/MM/yyyy")))
-                {
-                  fake.Save(imagePath, ImageFormat.Png);
-                }
+                using (Bitmap fake = image.DrawGPLX(name, dateTime.ToString("dd/MM/yyyy"))) fake.Save(imagePath, ImageFormat.Png);
               }
               chromeProfile.WriteLog("Download & Edit Avatar Completed");
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -116,6 +111,12 @@ namespace FacebookGPLX
           catch (OperationCanceledException)
           {
             return;
+          }
+          catch (CheckPointException)
+          {
+            ResultCheckPoint?.WriteLine(accountData);
+            ResultCheckPoint?.Flush();
+            chromeProfile.WriteLog("CheckPointException:" + accountData);
           }
           catch (ChromeAutoException cae)
           {
@@ -148,8 +149,9 @@ namespace FacebookGPLX
           }
           finally
           {
-            chromeProfile.WriteLog("Close chrome");
+            chromeProfile.ClearCookies();
             chromeProfile.CloseChrome();
+            chromeProfile.WriteLog("Close chrome");
           }
         }
       }
@@ -163,12 +165,16 @@ namespace FacebookGPLX
     {
       while (true)
       {
-        AccountData accountData = AccountsQueue.Dequeue();
-        if (accountData == null) break;
+        AccountData accountData = null;
 
         try
         {
-          chromeProfile.ResetProfileData();
+          lock(AccountsQueue)
+          {
+            if (StopLogAcc || AccountsQueue.Count == 0) return;
+            accountData = AccountsQueue.Dequeue();
+          }
+
           //string proxy = null;
           if (ProxysQueue.Count > 0)
           {
@@ -177,12 +183,14 @@ namespace FacebookGPLX
             {
               string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
               ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
-              chromeProfile.OpenChrome(null, ext_path);
+              chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, ext_path);
             }
-            else chromeProfile.OpenChrome(proxyHelper.Proxy, null);//set to chrome option
+            else chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, null);//set to chrome option
             //proxy = proxyHelper.Gen();
           }
-          else chromeProfile.OpenChrome();
+          else chromeProfile.OpenChrome(profile_index);
+
+          //chromeProfile.ClearCookies();
 
           chromeProfile.RunLogin(accountData);
 
@@ -204,22 +212,30 @@ namespace FacebookGPLX
         {
           return;
         }
+        catch (CheckPointException)
+        {
+          ResultCheckPoint?.WriteLine(accountData);
+          ResultCheckPoint?.Flush();
+          chromeProfile.WriteLog("CheckPointException:" + accountData);
+        }
         catch (ChromeAutoException cae)
         {
-          ResultError?.WriteLine(accountData + " -> " + cae.Message);
+          ResultError?.WriteLine(accountData + "| -> " + cae.Message);
           ResultError?.Flush();
           chromeProfile.WriteLog("ChromeAutoException:" + cae.Message);
         }
         catch (Exception ex)
         {
           if (ex is AggregateException ae) ex = ae.InnerException;
-          ResultError?.WriteLine(accountData + " -> " + ex.Message);
+          ResultError?.WriteLine(accountData + "| -> " + ex.Message);
           ResultError?.Flush();
           chromeProfile.WriteLog(ex.GetType().FullName + ":" + ex.Message + ex.StackTrace);
         }
         finally
         {
+          chromeProfile.ClearCookies();
           chromeProfile.CloseChrome();
+          chromeProfile.WriteLog("Close chrome");
         }
       }
     }
@@ -229,10 +245,7 @@ namespace FacebookGPLX
     public bool ReQueue => false;
     public void Cancel() => chromeProfile.Stop();
 
-    public bool CheckEquals(IQueue queue)
-    {
-      return this.Equals(queue);
-    }
+    public bool CheckEquals(IQueue queue)=> this.Equals(queue);
 
     public Task DoWork()
     {

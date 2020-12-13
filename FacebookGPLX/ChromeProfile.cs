@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TqkLibrary.Adb;
 using TqkLibrary.Media.Images;
 using TqkLibrary.Net.Captcha;
 using TqkLibrary.Net.RentCodeCo;
@@ -21,6 +22,10 @@ using TqkLibrary.SeleniumSupport;
 
 namespace FacebookGPLX
 {
+  class CheckPointException: Exception
+  {
+
+  }
   enum AdsResult
   {
     NotFound,
@@ -58,6 +63,9 @@ namespace FacebookGPLX
       options.AddArguments("--user-data-dir=" + ProfilePath);
       options.AddAdditionalCapability("useAutomationExtension", false);
       options.AddExcludedArgument("enable-automation");
+      //disable ask password
+      options.AddUserProfilePreference("credentials_enable_service",false);
+      options.AddUserProfilePreference("profile.password_manager_enabled", false);
       if (!string.IsNullOrEmpty(extensionPath)) options.AddExtensions(extensionPath);
       if (!string.IsNullOrEmpty(proxy)) options.AddArguments("--proxy-server=" + string.Format("http://{0}", proxy));
       return options;
@@ -80,7 +88,14 @@ namespace FacebookGPLX
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com");
         DelayWeb();
 
-        var eles = chromeDriver.FindElements(By.Id("email"));
+        var eles = chromeDriver.FindElements(By.CssSelector("button[data-cookiebanner='accept_button']"));
+        if (eles.Count > 0)
+        {
+          eles.First().Click();
+          DelayStep();
+        }
+
+        eles = chromeDriver.FindElements(By.Id("email"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id email");
         eles.First().Click();
         WriteLog("UserName: " + accountData.UserName);
@@ -98,33 +113,18 @@ namespace FacebookGPLX
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id u_0_b");
         eles.First().Click();
         DelayWeb();
-
-        //eles = chromeDriver.FindElements(By.Id("pass"));
-        //if (eles.Count > 0)
-        //{
-        //  eles.First().Click();
-        //  WriteLog("PassWord: " + accountData.PassWord);
-        //  eles.First().SendKeys(accountData.PassWord);
-        //  DelayStep();
-
-        //  eles = chromeDriver.FindElements(By.Id("loginbutton"));
-        //  if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id loginbutton");
-        //  eles.First().Click();
-        //  DelayWeb();
-        //}
-        
+                
         TwoFactorAuthNet.TwoFactorAuth twoFactorAuth = new TwoFactorAuthNet.TwoFactorAuth();
-        string facode = twoFactorAuth.GetCode(accountData.TwoFA);
-
         eles = chromeDriver.FindElements(By.Id("approvals_code"));
         if (eles.Count > 0)
         {
           eles.First().Click();
+          string facode = twoFactorAuth.GetCode(accountData.TwoFA);
           WriteLog("2FA: " + facode);
           eles.First().SendKeys(facode);
 
           eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
-          if (eles.Count == 0) throw new ChromeAutoException("");
+          if (eles.Count == 0) throw new ChromeAutoException("FindElements CssSelector button[id='checkpointSubmitButton'][name='submit[Continue]']");
           eles.First().Click();
           DelayWeb();
         }
@@ -171,7 +171,7 @@ namespace FacebookGPLX
           DelayWeb();
         }
 
-        if (chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new ChromeAutoException("Login failed");
+        if (chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new CheckPointException();
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Log Out]']"));
         if (eles.Count > 0) throw new ChromeAutoException("Đăng nhập thất bại, chưa xác nhận danh tính button[id='checkpointSubmitButton'][name='submit[Log Out]']");
       }
@@ -239,23 +239,45 @@ namespace FacebookGPLX
       else throw new ChromeAutoException("Chrome is not open");
     }
 
-    public void OpenChrome(string proxy = null, string extensionPath = null)
+    public void OpenChrome(int index, string proxy = null, string extensionPath = null)
     {
-      OpenChrome(InitChromeOptions(proxy, extensionPath));
-      chromeDriver.Manage().Window.Size = new Size(800, 500);
-#if DEBUG
-      chromeDriver.Manage().Window.Position = new Point(0, 0);
-#endif
+      if (!string.IsNullOrEmpty(extensionPath))
+      {
+        WriteLog("Open chrome and login proxy with extension: " + proxy);
+        OpenChrome(InitChromeOptions(null, extensionPath));
+      }
+      else if(!string.IsNullOrEmpty(proxy))
+      {
+        WriteLog("Open chrome with proxy: " + proxy);
+        OpenChrome(InitChromeOptions(proxy, null));
+      }
+      else
+      {
+        WriteLog("Open chrome");
+        OpenChrome(InitChromeOptions(null, null));
+      }
+
+
+      var pos = ChromeLocationHelper.GetPos(index);
+      chromeDriver.Manage().Window.Size = pos.Size;// new Size(800, 500);
+      chromeDriver.Manage().Window.Position = pos.Location;// new Point(0, 0);
     }
 
-    public bool ResetProfileData()
+    public void ClearCookies()
     {
-      if(!IsOpenChrome)
+      if(IsOpenChrome)
       {
-        if (Directory.Exists(ProfilePath)) Directory.Delete(ProfilePath, true);
-        return true;
+        WriteLog("Clear Cookies");
+        chromeDriver.Manage().Cookies.DeleteAllCookies();
+        if(chromeDriver.HasWebStorage)
+        {
+          WriteLog("Clear WebStorage");
+          chromeDriver.WebStorage.LocalStorage.Clear();
+          chromeDriver.WebStorage.SessionStorage.Clear();
+        }
+        //"var c = document.cookie.split('; '); for (i in c) document.cookie =/^[^=]+/.exec(c[i])[0] + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';"
+        chromeDriver.ExecuteScript("localStorage.clear();sessionStorage.clear();");
       }
-      else return false;
     }
 
     public new void CloseChrome() => base.CloseChrome();
@@ -270,7 +292,7 @@ namespace FacebookGPLX
       {
         try
         {
-          eles.First().Click();
+          eles.Last().Click();
           DelayWeb();
         }
         catch (Exception) { }
@@ -311,16 +333,22 @@ namespace FacebookGPLX
         RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
         while (phoneTry++ < SettingData.Setting.ReTryCount)
         {
-          RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;          
+          RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
+          if (rentCodeResult.Id == null) throw new ChromeAutoException("RentCode Request Result:" + rentCodeResult);
           DelayWeb();
           RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;//get phonenumber
           if (!rentCodeCheckOrderResults.Success)
           {
             if (phoneTry == SettingData.Setting.ReTryCount) break;
-            else continue;
+            else
+            {
+              WriteLog("rentCodeCheckOrderResults Failed: " + rentCodeCheckOrderResults + ", Tryagain: " + (phoneTry + 1));
+              DelayStep();
+              continue;
+            }
           }
 
-          string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber.Substring(1);
+          string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber?.Substring(1);
           WriteLog("Phone Number: " + phone);
           eles.First().SendKeys(phone);
 
@@ -371,6 +399,30 @@ namespace FacebookGPLX
         throw new ChromeAutoException($"RentCode Lấy sms thất bại với {phoneTry} lần thử");
       }
     }
+
+
+    void GetOtpSaferum(string deviceId)
+    {
+      var eles = chromeDriver.FindElements(By.Name("phone"));
+      if (eles.Count > 0)
+      {
+        BaseAdb adbService = new BaseAdb(deviceId, Extensions.AdbPath);
+        adbService.OpenApk("", "");
+
+        adbService.TapByPercent(0.5, 0.5);
+
+        using (Bitmap bitmap = adbService.ScreenShot())
+        {
+
+        }
+
+
+      }
+    }
+
+
+
+
 
     bool UploadImageFile(Task task,string imagePath)
     {

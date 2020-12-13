@@ -51,6 +51,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PInvoke.User32">
+      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.User32.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.Windows.Core">
+      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.Windows.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PInvoke.Windows.ShellScalingApi">
+      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.Windows.ShellScalingApi.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -98,6 +107,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TqkLibrary.Adb">
+      <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Adb.dll</HintPath>
+    </Reference>
     <Reference Include="TqkLibrary.Media">
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Media.dll</HintPath>
     </Reference>
@@ -132,6 +144,7 @@
     <Compile Include="Common\ImageHelper.cs" />
     <Compile Include="Common\ProxyHelper.cs" />
     <Compile Include="Common\UserAgent.cs" />
+    <Compile Include="Common\ChromeLocationHelper.cs" />
     <Compile Include="Data\AccountData.cs" />
     <Compile Include="Data\SettingData.cs" />
     <Compile Include="Extensions.cs" />

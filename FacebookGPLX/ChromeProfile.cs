@@ -187,7 +187,8 @@ namespace FacebookGPLX
         DelayWeb();
 
         var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
-        if (eles.Count == 0) throw new ChromeAutoException("button[target='_blank'] not found, Không tìm thấy nút kháng nghị");
+        if (eles.Count == 0) chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
+        if (eles.Count == 0) throw new ChromeAutoException("button[target='_blank'] and a[type='button'][target='_blank'] not found, Không tìm thấy nút kháng nghị");
         eles.First().Click();
         DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
@@ -333,22 +334,25 @@ namespace FacebookGPLX
         RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
         while (phoneTry++ < SettingData.Setting.ReTryCount)
         {
+          eles = chromeDriver.FindElements(By.Name("phone"));
           RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
-          if (rentCodeResult.Id == null) throw new ChromeAutoException("RentCode Request Result:" + rentCodeResult);
+          if (rentCodeResult.Id == null)
+          {
+            DelayWeb();
+            WriteLog("Rencode Order Failed, Try again");
+            continue;
+          }
+          DelayWeb();
           DelayWeb();
           RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;//get phonenumber
-          if (!rentCodeCheckOrderResults.Success)
+          if (!rentCodeCheckOrderResults.Success || string.IsNullOrEmpty(rentCodeCheckOrderResults.PhoneNumber))
           {
-            if (phoneTry == SettingData.Setting.ReTryCount) break;
-            else
-            {
-              WriteLog("rentCodeCheckOrderResults Failed: " + rentCodeCheckOrderResults + ", Tryagain: " + (phoneTry + 1));
-              DelayStep();
-              continue;
-            }
+            WriteLog("rentCodeCheckOrderResults Failed: " + rentCodeCheckOrderResults + ", Tryagain");
+            DelayStep();
+            continue;
           }
 
-          string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber?.Substring(1);
+          string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber.Substring(1);
           WriteLog("Phone Number: " + phone);
           eles.First().SendKeys(phone);
 
@@ -362,7 +366,7 @@ namespace FacebookGPLX
           int reTry = 30;
           while (reTry-- != 0)
           {
-            Delay(2000, 2000);
+            Delay(2000, 5000);
             rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;
             if (rentCodeCheckOrderResults.Success && rentCodeCheckOrderResults.Messages?.Count > 0)
             {
@@ -380,7 +384,10 @@ namespace FacebookGPLX
           }
           if (string.IsNullOrEmpty(code))
           {
-            chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+            WriteLog("Get code sms timeout, try again");
+            eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][aria-label][tabindex='0']"));
+            if(eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][aria-label][tabindex='0']");
+            eles.First().Click();
             DelayWeb();
             continue;
           }
@@ -411,12 +418,47 @@ namespace FacebookGPLX
 
         adbService.TapByPercent(0.5, 0.5);
 
+        string phone = null;
         using (Bitmap bitmap = adbService.ScreenShot())
         {
-
+          using(Bitmap crop = bitmap.CropImage(new Rectangle()))
+          {
+            //orc
+          }
         }
 
+        WriteLog("Phone Number: " + phone);
+        eles.First().SendKeys(phone);
 
+        eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Send Code']"));
+        if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Send Code']");
+        eles.First().Click();
+        DelayWeb();
+
+        string code = null;
+        while(true)
+        {
+          using(Bitmap bitmap = adbService.ScreenShot())
+          {
+            using (Bitmap crop = bitmap.CropImage(new Rectangle()))
+            {
+              //orc
+              break;
+            }
+          }
+          DelayStep();
+        }
+
+        eles = chromeDriver.FindElements(By.CssSelector("input[autocomplete='one-time-code']"));
+        if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[autocomplete='one-time-code']");
+        WriteLog("Sms code: " + code);
+        eles.First().SendKeys(code);
+
+        eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Next']"));
+        if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Next']");
+        eles.First().Click();
+        DelayWeb();
+        return;
       }
     }
 

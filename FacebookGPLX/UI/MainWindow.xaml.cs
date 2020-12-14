@@ -20,6 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TqkLibrary.Adb;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
 
@@ -30,12 +31,12 @@ namespace FacebookGPLX.UI
   /// </summary>
   public partial class MainWindow : Window
   {
-    readonly TaskQueue<ItemQueue> taskQueue = new TaskQueue<ItemQueue>()
+    private readonly TaskQueue<ItemQueue> taskQueue = new TaskQueue<ItemQueue>()
     {
       MaxRun = 0
     };
-    readonly MainWindowViewModel mainWindowViewModel;
 
+    private readonly MainWindowViewModel mainWindowViewModel;
 
     public MainWindow()
     {
@@ -60,6 +61,20 @@ namespace FacebookGPLX.UI
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
 #if DEBUG
+      BaseAdb adb = new BaseAdb();
+      //adb.DisableApk("com.safeum.android");
+      //adb.EnableApk("com.safeum.android");
+      //adb.ClearApk("com.safeum.android");
+      //adb.OpenApk("com.safeum.android", "im.sum.viewer.login.LoginActivity");
+      //adb.ScreenShot("D:\\temp\\file.png");
+      //adb.TapByPercent(0.5, 0.935);
+      adb.InputText("abcdef");
+      adb.Key(ADBKeyEvent.KEYCODE_TAB);
+      adb.InputText("asdasdsadas");
+      adb.Key(ADBKeyEvent.KEYCODE_TAB);
+      adb.InputText("asdasdsadas");
+      adb.TapByPercent(0.5, 0.5);
+
       //ChromeProfile chromeProfile = new ChromeProfile("Test");
       //chromeProfile.TestCaptcha();
 
@@ -78,8 +93,11 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100058850012762", PassWord = "THmedia@8386", TwoFA = "DCTKJCN3AS3OW4ZAIFRYMJCZC3XGBP4K" });//khang nghi thanh cong
       //AccountDatas.Add(new AccountData() { UserName = "100055013798404", PassWord = "THmedia@1102", TwoFA = "IVJK3MXYHXV5E3CK4HOB4QQKWJYVNOCJ" });//ko tim thay nut khang
       //AccountDatas.Add(new AccountData() { UserName = "100055194077117", PassWord = "THmedia@1102", TwoFA = "FURCC74PVQKETIQ5DVNNGLEZK2DILICN" });//acc bi checkpoint
-      //AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//language not english
-      AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//language not english
+      //AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//acc bi checkpoint
+      //AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//acc bi checkpoint
+      //AccountDatas.Add(new AccountData() { UserName = "100058311460546", PassWord = "THmedia@8386", TwoFA = "VWUOHHI6N4ZMJWUMUWBWMQNH6GZJRE3O" });//acc bi checkpoint
+      //AccountDatas.Add(new AccountData() { UserName = "100058236025901", PassWord = "THmedia@8386", TwoFA = "2D7BZCUSOYZAGGQ5YWS6UJ42ZBPM6UM3" });/ko tim thay nut khang
+      AccountDatas.Add(new AccountData() { UserName = "100058368257568", PassWord = "THmedia@8386", TwoFA = "ZLJ2RHT47XO7PR2C7BR3I3FXZERVMAVQ" });
       ProxysData.Add("217.163.29.98:35335:phuonglazy:bluecrazy");
       //mainWindowViewModel.AccountCount = AccountDatas.Count;
       //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
@@ -108,10 +126,13 @@ namespace FacebookGPLX.UI
       ItemQueue.ResultSuccess = null;
       ItemQueue.ResultError = null;
     }
-    #endregion
+
+    #endregion taskQueue
 
     #region Button
-    readonly List<AccountData> AccountDatas = new List<AccountData>();
+
+    private readonly List<AccountData> AccountDatas = new List<AccountData>();
+
     private void BT_LoadAccounts_Click(object sender, RoutedEventArgs e)
     {
       OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -125,7 +146,8 @@ namespace FacebookGPLX.UI
       }
     }
 
-    readonly List<string> ProxysData = new List<string>();
+    private readonly List<string> ProxysData = new List<string>();
+
     private void BT_LoadProxy_Click(object sender, RoutedEventArgs e)
     {
       OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -144,17 +166,16 @@ namespace FacebookGPLX.UI
       taskQueue.ShutDown();
     }
 
-
     private void BT_Run_Click(object sender, RoutedEventArgs e)
     {
-      if(taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
+      if (taskQueue.MaxRun == 0 && taskQueue.RunningCount == 0)
       {
         try
         {
-          Directory.Delete(Extensions.ChromeProfilePath, true); 
+          Directory.Delete(Extensions.ChromeProfilePath, true);
           Directory.CreateDirectory(Extensions.ChromeProfilePath);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
           MessageBox.Show(ex.Message + ex.StackTrace, ex.GetType().FullName);
           return;
@@ -216,6 +237,7 @@ namespace FacebookGPLX.UI
     {
       ItemQueue.StopLogAcc = true;
     }
-    #endregion
+
+    #endregion Button
   }
 }

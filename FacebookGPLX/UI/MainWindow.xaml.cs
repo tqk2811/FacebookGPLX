@@ -23,6 +23,9 @@ using System.Windows.Shapes;
 using TqkLibrary.Adb;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
+using TqkLibrary.Media.Images;
+using Tesseract;
+using Tesseract.Interop;
 
 namespace FacebookGPLX.UI
 {
@@ -37,6 +40,7 @@ namespace FacebookGPLX.UI
     };
 
     private readonly MainWindowViewModel mainWindowViewModel;
+    private readonly System.Timers.Timer timer = new System.Timers.Timer(1000);
 
     public MainWindow()
     {
@@ -56,25 +60,19 @@ namespace FacebookGPLX.UI
       taskQueue.RunRandom = false;
       taskQueue.OnRunComplete += TaskQueue_OnRunComplete;
       taskQueue.OnQueueComplete += TaskQueue_OnQueueComplete;
+      timer.Elapsed += Timer_Elapsed;
+      timer.Start();
+    }
+
+    private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+    {
+      var devices = BaseAdb.GetDevices().Where(x => !x.EndsWith("\toffline"));
+      mainWindowViewModel.DevicesCount = devices.Count();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
 #if DEBUG
-      BaseAdb adb = new BaseAdb();
-      //adb.DisableApk("com.safeum.android");
-      //adb.EnableApk("com.safeum.android");
-      //adb.ClearApk("com.safeum.android");
-      //adb.OpenApk("com.safeum.android", "im.sum.viewer.login.LoginActivity");
-      //adb.ScreenShot("D:\\temp\\file.png");
-      //adb.TapByPercent(0.5, 0.935);
-      adb.InputText("abcdef");
-      adb.Key(ADBKeyEvent.KEYCODE_TAB);
-      adb.InputText("asdasdsadas");
-      adb.Key(ADBKeyEvent.KEYCODE_TAB);
-      adb.InputText("asdasdsadas");
-      adb.TapByPercent(0.5, 0.5);
-
       //ChromeProfile chromeProfile = new ChromeProfile("Test");
       //chromeProfile.TestCaptcha();
 
@@ -97,8 +95,8 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//acc bi checkpoint
       //AccountDatas.Add(new AccountData() { UserName = "100058311460546", PassWord = "THmedia@8386", TwoFA = "VWUOHHI6N4ZMJWUMUWBWMQNH6GZJRE3O" });//acc bi checkpoint
       //AccountDatas.Add(new AccountData() { UserName = "100058236025901", PassWord = "THmedia@8386", TwoFA = "2D7BZCUSOYZAGGQ5YWS6UJ42ZBPM6UM3" });/ko tim thay nut khang
-      AccountDatas.Add(new AccountData() { UserName = "100058368257568", PassWord = "THmedia@8386", TwoFA = "ZLJ2RHT47XO7PR2C7BR3I3FXZERVMAVQ" });
-      ProxysData.Add("217.163.29.98:35335:phuonglazy:bluecrazy");
+      //AccountDatas.Add(new AccountData() { UserName = "100058368257568", PassWord = "THmedia@8386", TwoFA = "ZLJ2RHT47XO7PR2C7BR3I3FXZERVMAVQ" });
+      //ProxysData.Add("217.163.29.98:35335:phuonglazy:bluecrazy");
       //mainWindowViewModel.AccountCount = AccountDatas.Count;
       //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
       //ImageHelper.DrawGPLX(bitmap, "Nguyễn Văn Anh", "24/12/1990").Save("D:\\test.png");
@@ -116,6 +114,7 @@ namespace FacebookGPLX.UI
 
     private void TaskQueue_OnRunComplete()
     {
+      timer.Start();
       taskQueue.MaxRun = 0;
       ItemQueue.ResultCheckPoint?.Close();
       ItemQueue.ResultFailed?.Close();
@@ -195,6 +194,7 @@ namespace FacebookGPLX.UI
         ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_checkpoint.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
         ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
+        timer.Stop();
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -229,6 +229,7 @@ namespace FacebookGPLX.UI
         ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_failed.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_success.txt", true);
         ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_error.txt", true);
+        timer.Stop();
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }

@@ -5,71 +5,79 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:WpfUiControls="clr-namespace:TqkLibrary.WpfUi.UserControls;assembly=TqkLibrary.WpfUi"
         xmlns:local="clr-namespace:FacebookGPLX.UI"
+        xmlns:data="clr-namespace:FacebookGPLX.Data"
+        xmlns:WpfUiConventers="clr-namespace:TqkLibrary.WpfUi.Converters;assembly=TqkLibrary.WpfUi"
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         MinHeight="300" MinWidth="650"
         Title="Facebook GPLX" Height="350" Width="800" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <WpfUiConventers:EnumConventer x:Key="EnumConventer" IsAttributeFlag="False" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="58"/>
+            <RowDefinition />
+            <RowDefinition Height="74" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.RowSpan="2">
             <Button x:Name="BT_LoadAccounts" Click="BT_LoadAccounts_Click" Margin="10,5,10,0" VerticalAlignment="Top" Height="20">
                 <TextBlock>
-                    <Run Text="Load Accounts ("/>
-                    <Run Text="{Binding AccountCount}"/>
-                    <Run Text=")"/>
+                    <Run Text="Load Accounts (" />
+                    <Run Text="{Binding AccountCount}" />
+                    <Run Text=")" />
                 </TextBlock>
             </Button>
             <Button x:Name="BT_LoadProxy" Click="BT_LoadProxy_Click" Margin="10,30,10,0" VerticalAlignment="Top">
                 <TextBlock>
-                    <Run Text="Load Proxy ("/>
-                    <Run Text="{Binding ProxyCount}"/>
-                    <Run Text=")"/>
+                    <Run Text="Load Proxy (" />
+                    <Run Text="{Binding ProxyCount}" />
+                    <Run Text=")" />
                 </TextBlock>
             </Button>
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,67,0,0" TextWrapping="Wrap" Text="Số Luồng:" VerticalAlignment="Top" Height="16" Width="53"/>
-            <WpfUiControls:NumericUpDown Margin="0,63,70,0" Min="1" Max="50" Step="1" NumValue="{Binding MaxRun}" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,67,0,0" TextWrapping="Wrap" Text="Số Luồng:" VerticalAlignment="Top" Height="16" Width="53" />
+            <WpfUiControls:NumericUpDown Margin="0,63,70,0" Min="1" Max="50" Step="1" NumValue="{Binding MaxRun}" VerticalAlignment="Top" HorizontalAlignment="Right" />
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,96,0,0" TextWrapping="Wrap" Text="Delay Bước:" VerticalAlignment="Top"/>
-            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMin" NumValue="{Binding DelayStepMin}" Min="0" Max="{Binding NumValue,ElementName=NUD_DelayStepMax}" Step="100" Margin="0,90,70,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMax" NumValue="{Binding DelayStepMax}" Min="{Binding NumValue,ElementName=NUD_DelayStepMin}" Max="10000" Step="100" Margin="0,90,5,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,96,0,0" TextWrapping="Wrap" Text="Delay Bước:" VerticalAlignment="Top" />
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMin" NumValue="{Binding DelayStepMin}" Min="0" Max="{Binding NumValue,ElementName=NUD_DelayStepMax}" Step="100" Margin="0,90,70,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayStepMax" NumValue="{Binding DelayStepMax}" Min="{Binding NumValue,ElementName=NUD_DelayStepMin}" Max="10000" Step="100" Margin="0,90,5,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,122,0,0" TextWrapping="Wrap" Text="Delay Web Load:" VerticalAlignment="Top"/>
-            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMin" NumValue="{Binding DelayWebMin}" Min="2000" Max="{Binding NumValue,ElementName=NUD_DelayWebMax}" Step="1000" Margin="0,117,70,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMax" NumValue="{Binding DelayWebMax}" Min="{Binding NumValue,ElementName=NUD_DelayWebMin}" Max="30000" Step="1000" Margin="0,117,5,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,122,0,0" TextWrapping="Wrap" Text="Delay Web Load:" VerticalAlignment="Top" />
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMin" NumValue="{Binding DelayWebMin}" Min="2000" Max="{Binding NumValue,ElementName=NUD_DelayWebMax}" Step="1000" Margin="0,117,70,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
+            <WpfUiControls:NumericUpDown x:Name="NUD_DelayWebMax" NumValue="{Binding DelayWebMax}" Min="{Binding NumValue,ElementName=NUD_DelayWebMin}" Max="30000" Step="1000" Margin="0,117,5,0" VerticalAlignment="Top" HorizontalAlignment="Right" />
 
-            <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Số lần thử lại:" VerticalAlignment="Top"/>
-            <WpfUiControls:NumericUpDown NumValue="{Binding ReTryCount}" Min="0" Max="20" Step="1" Margin="120,144,0,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Left"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Số lần thử lại:" VerticalAlignment="Top" />
+            <WpfUiControls:NumericUpDown NumValue="{Binding ReTryCount}" Min="0" Max="20" Step="1" Margin="120,144,0,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Left" />
 
-            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,73" VerticalAlignment="Bottom" Width="155" Height="20"/>
-            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75"/>
-            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check Status Acc" HorizontalAlignment="Left" Margin="5,0,0,48" VerticalAlignment="Bottom" Width="155"/>
-            <Button x:Name="BT_StopNext" Click="BT_StopNext_Click" Content="Dừng log acc tiếp theo" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="155"/>
-
+            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,73" VerticalAlignment="Bottom" Width="155" Height="20" />
+            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75" />
+            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check Status Acc" HorizontalAlignment="Left" Margin="5,0,0,48" VerticalAlignment="Bottom" Width="155" />
+            <Button x:Name="BT_StopNext" Click="BT_StopNext_Click" Content="Dừng log acc tiếp theo" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="155" />
         </Grid>
 
         <ListView Grid.Column="1" ItemsSource="{Binding Logs}" Margin="5,5,5,5">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="500" Header="Log" DisplayMemberBinding="{Binding}"/>
+                    <GridViewColumn Width="500" Header="Log" DisplayMemberBinding="{Binding}" />
                 </GridView>
             </ListView.View>
         </ListView>
 
         <Grid Grid.Row="1" Grid.Column="1">
-            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,9" TextWrapping="Wrap" Text="RentCodeKey:" VerticalAlignment="Bottom"/>
-            <TextBox Height="20" Margin="84,0,5,6" Text="{Binding RentCodeKey}" VerticalAlignment="Bottom"/>
-            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,35" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Bottom"/>
-            <TextBox Height="23" Margin="84,0,5,31" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Bottom"/>
+            <RadioButton Content="Saferum" IsChecked="{Binding SmsService,Converter={StaticResource EnumConventer},ConverterParameter={x:Static data:SmsService.Saferum}}" HorizontalAlignment="Left" Margin="5,0,0,59" VerticalAlignment="Bottom" />
+            <TextBlock HorizontalAlignment="Left" Margin="102,-1,0,59" TextWrapping="Wrap" VerticalAlignment="Bottom">
+                <Run Text="Android Devices Count: " />
+                <Run Text="{Binding DevicesCount}" />
+            </TextBlock>
+            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,9" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Bottom" />
+            <TextBox Height="20" Margin="102,0,5,6" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Bottom" />
+            <RadioButton IsChecked="{Binding SmsService,Converter={StaticResource EnumConventer},ConverterParameter={x:Static data:SmsService.Rencode}}" HorizontalAlignment="Left" Margin="5,0,0,35" Content="RentCodeKey:" VerticalAlignment="Bottom" />
+            <TextBox Height="23" Margin="102,0,5,31" Text="{Binding RentCodeKey}" VerticalAlignment="Bottom" />
         </Grid>
-
     </Grid>
 </Window>

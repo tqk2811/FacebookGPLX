@@ -177,6 +177,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="..\..\..\..\..\..\Github\tessdata_fast\eng.traineddata">
+      <Link>eng.traineddata</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -197,6 +201,40 @@
       <Project>{ed75e171-cefe-45ef-b671-7e89b80c0149}</Project>
       <Name>TqkLibrary.Adb</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\setting_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\concrt140.dll">
+      <Link>concrt140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\cvextern.dll">
+      <Link>cvextern.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\Emgu.CV.World.dll">
+      <Link>Emgu.CV.World.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\msvcp140.dll">
+      <Link>msvcp140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\opencv_ffmpeg341.dll">
+      <Link>opencv_ffmpeg341.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\opencv_ffmpeg343.dll">
+      <Link>opencv_ffmpeg343.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\vcruntime140.dll">
+      <Link>vcruntime140.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\message_safeum.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets" Condition="Exists('..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets')" />

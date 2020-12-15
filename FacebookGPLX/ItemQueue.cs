@@ -7,10 +7,10 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Tesseract;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
 using TqkLibrary.SeleniumSupport;
@@ -97,7 +97,7 @@ namespace FacebookGPLX
 
               using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
               {
-                using (Bitmap fake = image.DrawGPLX(name, dateTime.ToString("dd/MM/yyyy"))) fake.Save(imagePath, ImageFormat.Png);
+                using (Bitmap fake = image.DrawGPLX(name, dateTime.ToString("dd/MM/yyyy"))) fake.Save(imagePath, System.Drawing.Imaging.ImageFormat.Png);
               }
               chromeProfile.WriteLog("Download & Edit Avatar Completed");
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);

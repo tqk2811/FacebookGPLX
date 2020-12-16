@@ -46,11 +46,13 @@ namespace FacebookGPLX
     public event LogCallback LogEvent;
 
     private RentCodeCheckOrderResults RencodeLastOder = null;
+    private readonly BaseAdb adb;
 
-    public ChromeProfile(string ProfileName) : base(Extensions.ChromeDrivePath)
+    public ChromeProfile(string ProfileName, string deviceId) : base(Extensions.ChromeDrivePath)
     {
       this.ProfileName = ProfileName;
       this.ProfilePath = Extensions.ChromeProfilePath + "\\" + ProfileName;
+      if (!string.IsNullOrEmpty(deviceId)) this.adb = new BaseAdb(deviceId, Extensions.AdbPath);
     }
 
     private ChromeOptions InitChromeOptions(string proxy = null, string extensionPath = null)
@@ -292,7 +294,7 @@ namespace FacebookGPLX
 
     private void ClickContinue()
     {
-      var eles = chromeDriver.FindElements(By.CssSelector("div[role='button']"));
+      var eles = chromeDriver.FindElements(By.CssSelector("div[role='button']:not([type='file'])"));
       if (eles.Count != 0)
       {
         try
@@ -390,96 +392,12 @@ namespace FacebookGPLX
       }
     }
 
-    private void GetOtpSmsRencode()
-    {
-      var eles = chromeDriver.FindElements(By.Name("phone"));
-      if (eles.Count > 0)
-      {
-        WriteLog("Get Code From Phone Number");
-        int phoneTry = 0;
-        //get phone from api
-        RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
-        while (phoneTry++ < SettingData.Setting.ReTryCount)
-        {
-          eles = chromeDriver.FindElements(By.Name("phone"));
-          RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
-          if (rentCodeResult.Id == null)
-          {
-            DelayWeb();
-            WriteLog("Rencode Order Failed, Try again");
-            continue;
-          }
-          DelayWeb();
-          DelayWeb();
-          RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;//get phonenumber
-          if (!rentCodeCheckOrderResults.Success || string.IsNullOrEmpty(rentCodeCheckOrderResults.PhoneNumber))
-          {
-            WriteLog("rentCodeCheckOrderResults Failed: " + rentCodeCheckOrderResults + ", Tryagain");
-            DelayStep();
-            continue;
-          }
-
-          string phone = "+84" + rentCodeCheckOrderResults.PhoneNumber.Substring(1);
-          WriteLog("Phone Number: " + phone);
-          eles.First().SendKeys(phone);
-
-          eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Send Code']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Send Code']");
-          eles.First().Click();
-          DelayWeb();
-
-          //get code from api
-          string code = string.Empty;
-          int reTry = 30;
-          while (reTry-- != 0)
-          {
-            Delay(2000, 5000);
-            rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;
-            if (rentCodeCheckOrderResults.Success && rentCodeCheckOrderResults.Messages?.Count > 0)
-            {
-              foreach (var sms in rentCodeCheckOrderResults.Messages)
-              {
-                var match = regex_smsCode.Match(sms.Message);
-                if (match.Success)
-                {
-                  code = match.Value;
-                  break;
-                }
-              }
-            }
-            if (!string.IsNullOrEmpty(code)) break;
-          }
-          if (string.IsNullOrEmpty(code))
-          {
-            WriteLog("Get code sms timeout, try again");
-            eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][aria-label][tabindex='0']"));
-            if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][aria-label][tabindex='0']");
-            eles.First().Click();
-            DelayWeb();
-            continue;
-          }
-
-          eles = chromeDriver.FindElements(By.CssSelector("input[autocomplete='one-time-code']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[autocomplete='one-time-code']");
-          WriteLog("Sms code: " + code);
-          eles.First().SendKeys(code);
-
-          eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Next']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Next']");
-          eles.First().Click();
-          DelayWeb();
-          return;
-        }
-        throw new ChromeAutoException($"RentCode Lấy sms thất bại với {phoneTry} lần thử");
-      }
-    }
-
     private string GetPhoneNumber()
     {
       switch (SettingData.Setting.SmsService)
       {
         case SmsService.Rencode: return GetRencodePhone();
-        case SmsService.Saferum: return GetSafeumPhone("", "");
+        case SmsService.Saferum: return GetSafeumPhone();
         default: return string.Empty;
       }
     }
@@ -510,9 +428,10 @@ namespace FacebookGPLX
       }
     }
 
-    private string GetSafeumPhone(string userName, string passWord)
+    private string GetSafeumPhone()
     {
-      BaseAdb adb = new BaseAdb();
+      string userName = Extensions.RandomString(8, 15);
+      string passWord = Extensions.RandomString(7);
       adb.DisableApk("com.safeum.android");
       adb.EnableApk("com.safeum.android");
       adb.ClearApk("com.safeum.android");
@@ -526,6 +445,7 @@ namespace FacebookGPLX
       adb.Key(TqkLibrary.Adb.ADBKeyEvent.KEYCODE_TAB);
       adb.InputText(passWord);
       adb.TapByPercent(0.5, 0.5);
+      DelayStep();
       adb.TapByPercent(0.5, 0.24375);//begin to use
       DelayWeb();
       while (true)
@@ -540,14 +460,14 @@ namespace FacebookGPLX
           }
         }
       }
-      Bitmap bitmap = adb.ScreenShot();
+      using Bitmap bitmap = adb.ScreenShot();
       adb.TapByPercent(0.3167, 0.107);
-      Bitmap crop = bitmap.CropImage(new Rectangle() { X = 240, Y = 340, Width = 180, Height = 70 });
+      using Bitmap crop = bitmap.CropImage(new Rectangle() { X = 240, Y = 340, Width = 180, Height = 70 });
       //crop.Save("D:\\temp\\crop.png");
       using TesseractEngine tesseractEngine = new TesseractEngine(Extensions.ExeFolderPath, "eng", EngineMode.Default);
       tesseractEngine.DefaultPageSegMode = PageSegMode.SparseText;
       using Page page = tesseractEngine.Process(crop);
-      string text = page.GetText().Replace(" ", "").Trim();
+      string text = "+" + page.GetText().Replace(" ", "").Trim();
       return text;
     }
 
@@ -574,7 +494,6 @@ namespace FacebookGPLX
 
     private string GetSafeumSms()
     {
-      BaseAdb adb = new BaseAdb();
       adb.TapByPercent(0.5, 0.1867);
       DelayStep();
       using Bitmap bitmap = adb.ScreenShot();

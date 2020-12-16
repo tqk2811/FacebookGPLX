@@ -197,12 +197,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Library\TqkLibrary.Adb\TqkLibrary.Adb.csproj">
-      <Project>{ed75e171-cefe-45ef-b671-7e89b80c0149}</Project>
-      <Name>TqkLibrary.Adb</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\setting_icon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +229,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\message_safeum.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Library\TqkLibrary.Adb\TqkLibrary.Adb.csproj">
+      <Project>{ed75e171-cefe-45ef-b671-7e89b80c0149}</Project>
+      <Name>TqkLibrary.Adb</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets" Condition="Exists('..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets')" />

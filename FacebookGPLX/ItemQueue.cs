@@ -32,10 +32,10 @@ namespace FacebookGPLX
     private readonly ChromeProfile chromeProfile;
     private readonly int profile_index = -1;
 
-    public ItemQueue(int profile_index, LogCallback logCallback)
+    public ItemQueue(int profile_index, LogCallback logCallback, string deviceId)
     {
       this.profile_index = profile_index;
-      this.chromeProfile = new ChromeProfile("Profile_" + profile_index);
+      this.chromeProfile = new ChromeProfile("Profile_" + profile_index, deviceId);
       this.chromeProfile.LogEvent += logCallback;
     }
 
@@ -55,9 +55,9 @@ namespace FacebookGPLX
               accountData = AccountsQueue.Dequeue();
             }
 #if DEBUG
-            //chromeProfile.OpenChrome();
-            //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
-            //return;
+            chromeProfile.OpenChrome(0);
+            chromeProfile.RunAdsManager("", Task.FromResult(0), null);
+            return;
 #endif
             ProxyHelper proxyHelper = null;
             if (ProxysQueue.Count > 0)

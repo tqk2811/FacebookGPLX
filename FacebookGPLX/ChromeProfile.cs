@@ -14,11 +14,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Tesseract;
-using TqkLibrary.Adb;
 using TqkLibrary.Media.Images;
 using TqkLibrary.Net.Captcha;
-using TqkLibrary.Net.RentCodeCo;
+using TqkLibrary.Net.PhoneNumberApi.RentCodeCo;
+using TqkLibrary.Net.PhoneNumberApi.ChoThueSimCodeCom;
+using TqkLibrary.Net.PhoneNumberApi.OtpSimCom;
+using TqkLibrary.Net.PhoneNumberApi.SimThueCom;
 using TqkLibrary.SeleniumSupport;
 
 namespace FacebookGPLX
@@ -45,14 +46,10 @@ namespace FacebookGPLX
 
     public event LogCallback LogEvent;
 
-    private RentCodeCheckOrderResults RencodeLastOder = null;
-    private readonly BaseAdb adb;
-
-    public ChromeProfile(string ProfileName, string deviceId) : base(Extensions.ChromeDrivePath)
+    public ChromeProfile(string ProfileName) : base(Extensions.ChromeDrivePath)
     {
       this.ProfileName = ProfileName;
       this.ProfilePath = Extensions.ChromeProfilePath + "\\" + ProfileName;
-      if (!string.IsNullOrEmpty(deviceId)) this.adb = new BaseAdb(deviceId, Extensions.AdbPath);
     }
 
     private ChromeOptions InitChromeOptions(string proxy = null, string extensionPath = null)
@@ -92,7 +89,7 @@ namespace FacebookGPLX
     {
       if (IsOpenChrome)
       {
-        WriteLog("Start Run Login");
+        WriteLog("Start Run Login");//id=ssrb_top_nav_start is logged
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com");
         DelayWeb();
 
@@ -122,6 +119,20 @@ namespace FacebookGPLX
         eles.First().Click();
         DelayWeb();
 
+        eles = chromeDriver.FindElements(By.Id("pass"));
+        if (eles.Count > 0)
+        {
+          eles.First().Click();
+          WriteLog("PassWord: " + accountData.PassWord);
+          eles.First().SendKeys(accountData.PassWord);
+          DelayStep();
+
+          eles = chromeDriver.FindElements(By.Id("loginbutton"));
+          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id loginbutton");
+          eles.First().Click();
+          DelayWeb();
+        }
+
         TwoFactorAuthNet.TwoFactorAuth twoFactorAuth = new TwoFactorAuthNet.TwoFactorAuth();
         eles = chromeDriver.FindElements(By.Id("approvals_code"));
         if (eles.Count > 0)
@@ -131,48 +142,48 @@ namespace FacebookGPLX
           WriteLog("2FA: " + facode);
           eles.First().SendKeys(facode);
 
-          eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements CssSelector button[id='checkpointSubmitButton'][name='submit[Continue]']");
+          eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
+          if (eles.Count == 0) throw new ChromeAutoException("FindElements CssSelector button[id='checkpointSubmitButton']");
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[This was me]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
           DelayWeb();
         }
 
-        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton'][name='submit[Continue]']"));
+        eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
@@ -314,11 +325,12 @@ namespace FacebookGPLX
 
     private void CheckSomethingWentWrong()
     {
-      //if(chromeDriver.PageSource.Contains("Sorry, something went wrong"))
-      //{
-      //  chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
-      //  DelayWeb();
-      //}
+      var eles = chromeDriver.FindElements(By.CssSelector("img[src$='general_gray_wash.svg']"));
+      if (eles.Count > 0)
+      {
+        chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+        DelayWeb();
+      }
     }
 
     private void ClickCaptcha()
@@ -326,6 +338,7 @@ namespace FacebookGPLX
       var eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
       if (eles.Count > 0)
       {
+        WriteLog("Resolve Captcha");
         ResolveCaptcha_New(eles.First());
         ClickContinue();
       }
@@ -354,22 +367,27 @@ namespace FacebookGPLX
           WriteLog("Phone Number: " + phoneNumber);
           eles.First().SendKeys(phoneNumber);
 
-          eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Send Code']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Send Code']");
-          eles.First().Click();
-          DelayWeb();
+          ClickContinue();
 
           string code = string.Empty;
           int reTry = 30;
           while (reTry-- != 0)
           {
-            code = GetSms();
+            try
+            {
+              code = GetSms();
+            }
+            catch (Exception ex2)
+            {
+              WriteLog("Get code sms Exception: " + ex2.Message);
+              break;
+            }
             if (!string.IsNullOrEmpty(code)) break;
             else DelayStep();
           }
           if (string.IsNullOrEmpty(code))
           {
-            WriteLog("Get code sms timeout, try again");
+            WriteLog("Get code sms timeout/Exception, try again");
             eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][aria-label][tabindex='0']"));
             if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][aria-label][tabindex='0']");
             eles.First().Click();
@@ -382,8 +400,8 @@ namespace FacebookGPLX
           WriteLog("Sms code: " + code);
           eles.First().SendKeys(code);
 
-          eles = chromeDriver.FindElements(By.CssSelector("div[aria-label='Next']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[aria-label='Next']");
+          eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][class*='s1i5eluu']"));
+          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][class*='s1i5eluu']");
           eles.First().Click();
           DelayWeb();
           return;
@@ -397,7 +415,9 @@ namespace FacebookGPLX
       switch (SettingData.Setting.SmsService)
       {
         case SmsService.Rencode: return GetRencodePhone();
-        case SmsService.Saferum: return GetSafeumPhone();
+        case SmsService.ChoThueSim: return GetChoThueSimCodePhone();
+        case SmsService.OtpSim: return GetOtpSimPhone();
+        case SmsService.SimThue: return GetSimThueComPhone();
         default: return string.Empty;
       }
     }
@@ -407,74 +427,40 @@ namespace FacebookGPLX
       switch (SettingData.Setting.SmsService)
       {
         case SmsService.Rencode: return GetRencodeSms();
-        case SmsService.Saferum: return GetSafeumSms();
+        case SmsService.ChoThueSim: return GetChoThueSimCodeSms();
+        case SmsService.OtpSim: return GetOtpSimSms();
+        case SmsService.SimThue: return GetSimThueComSms();
         default: return string.Empty;
       }
     }
 
+    #region Rencode
+
+    private RentCodeResult rentCodeResult = null;
+
     private string GetRencodePhone()
     {
-      RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
-      RentCodeResult rentCodeResult = rentCode.Request(1, false, RentCode.NetworkProvider.Viettel).Result;
-      if (rentCodeResult.Id == null) return string.Empty;
+      RentCodeApi rentCode = new RentCodeApi(SettingData.Setting.RentCodeKey);
+      RentCodeResult rentCodeResult = rentCode.Request(1, false, NetworkProvider.Viettel).Result;
+      if (rentCodeResult.Id == null || rentCodeResult.Success != true)
+      {
+        WriteLog($"RentCodeResult Message: {rentCodeResult?.Message}");
+        return string.Empty;
+      }
       DelayWeb();
       DelayWeb();
       RentCodeCheckOrderResults rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;
       if (!rentCodeCheckOrderResults.Success || string.IsNullOrEmpty(rentCodeCheckOrderResults.PhoneNumber)) return string.Empty;
       else
       {
-        RencodeLastOder = rentCodeCheckOrderResults;
+        this.rentCodeResult = rentCodeResult;
         return "+84" + rentCodeCheckOrderResults.PhoneNumber.Substring(1);
       }
     }
 
-    private string GetSafeumPhone()
-    {
-      string userName = Extensions.RandomString(8, 15);
-      string passWord = Extensions.RandomString(7);
-      adb.DisableApk("com.safeum.android");
-      adb.EnableApk("com.safeum.android");
-      adb.ClearApk("com.safeum.android");
-      adb.OpenApk("com.safeum.android", "im.sum.viewer.login.LoginActivity");
-      DelayStep();
-      //adb.ScreenShot("D:\\temp\\file.png");
-      adb.TapByPercent(0.5, 0.935);
-      adb.InputText(userName);
-      adb.Key(TqkLibrary.Adb.ADBKeyEvent.KEYCODE_TAB);
-      adb.InputText(passWord);
-      adb.Key(TqkLibrary.Adb.ADBKeyEvent.KEYCODE_TAB);
-      adb.InputText(passWord);
-      adb.TapByPercent(0.5, 0.5);
-      DelayStep();
-      adb.TapByPercent(0.5, 0.24375);//begin to use
-      DelayWeb();
-      while (true)
-      {
-        using (Bitmap shoot = adb.ScreenShot())
-        {
-          Point? point = ImageScanOpenCV.FindOutPoint(shoot, Properties.Resources.setting_icon, 0.75);
-          if (point != null)
-          {
-            adb.TapByPercent(0.74167, 0.107);//setting
-            break;
-          }
-        }
-      }
-      using Bitmap bitmap = adb.ScreenShot();
-      adb.TapByPercent(0.3167, 0.107);
-      using Bitmap crop = bitmap.CropImage(new Rectangle() { X = 240, Y = 340, Width = 180, Height = 70 });
-      //crop.Save("D:\\temp\\crop.png");
-      using TesseractEngine tesseractEngine = new TesseractEngine(Extensions.ExeFolderPath, "eng", EngineMode.Default);
-      tesseractEngine.DefaultPageSegMode = PageSegMode.SparseText;
-      using Page page = tesseractEngine.Process(crop);
-      string text = "+" + page.GetText().Replace(" ", "").Trim();
-      return text;
-    }
-
     private string GetRencodeSms()
     {
-      RentCodeResult rentCodeResult = null;
-      RentCode rentCode = new RentCode(SettingData.Setting.RentCodeKey);
+      RentCodeApi rentCode = new RentCodeApi(SettingData.Setting.RentCodeKey);
       var rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;
       string code = string.Empty;
       if (rentCodeCheckOrderResults.Success && rentCodeCheckOrderResults.Messages?.Count > 0)
@@ -492,19 +478,123 @@ namespace FacebookGPLX
       return code;
     }
 
-    private string GetSafeumSms()
+    #endregion Rencode
+
+    #region OtpSim
+
+    private BaseResult<PhoneRequestResult> OtpSimBaseResult = null;
+
+    private string GetOtpSimPhone()
     {
-      adb.TapByPercent(0.5, 0.1867);
-      DelayStep();
-      using Bitmap bitmap = adb.ScreenShot();
-      using Bitmap crop = bitmap.CropImage(new Rectangle() { X = 0, Y = 850, Width = 720, Height = 360 });
-      using TesseractEngine tesseractEngine = new TesseractEngine(Extensions.ExeFolderPath, "eng", EngineMode.Default);
-      tesseractEngine.DefaultPageSegMode = PageSegMode.SparseText;
-      using Page page = tesseractEngine.Process(crop);
-      string text = page.GetText().Trim();
-      ////
-      return text;
+      OtpSimApi otpSimApi = new OtpSimApi(SettingData.Setting.OtpSimKey);
+      var phone = otpSimApi.PhonesRequest(new DataService() { Id = 7 }).Result;
+      if (phone.Success && phone.StatusCode == StatusCode.Success)
+      {
+        OtpSimBaseResult = phone;
+        return "+84" + phone.Data.PhoneNumber;
+      }
+      else
+      {
+        WriteLog("GetOtpSimPhone: " + phone.StatusCode + ", " + phone.Message);
+        return string.Empty;
+      }
     }
+
+    private string GetOtpSimSms()
+    {
+      OtpSimApi otpSimApi = new OtpSimApi(SettingData.Setting.OtpSimKey);
+      var message = otpSimApi.GetPhoneMessage(OtpSimBaseResult.Data).Result;
+      if (message.Success && message.StatusCode == StatusCode.Success)
+      {
+        return message.Data.Messages?.FirstOrDefault().Otp;
+      }
+      else
+      {
+        WriteLog("GetOtpSimSms: " + message.StatusCode + ", " + message.Message);
+        return string.Empty;
+      }
+    }
+
+    #endregion OtpSim
+
+    #region ChoThueSimCode
+
+    private BaseResult<ResponseCodeGetPhoneNumber, PhoneNumberResult> ChoThueSimCodePhone = null;
+
+    private string GetChoThueSimCodePhone()
+    {
+      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(SettingData.Setting.ChoThueSimKey);
+      var phone = choThueSimCodeApi.GetPhoneNumber(1001).Result;
+      if (phone.ResponseCode == ResponseCodeGetPhoneNumber.Success)
+      {
+        ChoThueSimCodePhone = phone;
+        return phone.Result.Number;
+      }
+      else
+      {
+        WriteLog("GetChoThueSimCodePhone: " + phone.ResponseCode + ", " + phone.Msg);
+        return string.Empty;
+      }
+    }
+
+    private string GetChoThueSimCodeSms()
+    {
+      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(SettingData.Setting.ChoThueSimKey);
+      var message = choThueSimCodeApi.GetMessage(ChoThueSimCodePhone.Result).Result;
+      if (message.ResponseCode == ResponseCodeMessage.Success)
+      {
+        return message.Result.Code;
+      }
+      else
+      {
+        WriteLog("GetChoThueSimCodeSms: " + message.ResponseCode + ", " + message.Msg);
+        return string.Empty;
+      }
+    }
+
+    #endregion ChoThueSimCode
+
+    #region SimThueCom
+
+    private RequestResult SimThueComPhone = null;
+
+    private string GetSimThueComPhone()
+    {
+      SimThueApi simThueApi = new SimThueApi(SettingData.Setting.SimThueKey);
+      var request = simThueApi.CreateRequest(new ServiceResult() { Id = 9 }).Result;
+      if (request.Success)
+      {
+        DelayWeb();
+        var phone = simThueApi.CheckRequest(request).Result;
+        if (phone.Success)
+        {
+          SimThueComPhone = request;
+          return "+84" + phone.Number.Value.ToString();
+        }
+        else WriteLog("GetSimThueComPhone: " + phone.Message);
+      }
+      else WriteLog("GetSimThueComPhone: " + request.Message);
+      return string.Empty;
+    }
+
+    private string GetSimThueComSms()
+    {
+      SimThueApi simThueApi = new SimThueApi(SettingData.Setting.SimThueKey);
+      var phone = simThueApi.CheckRequest(SimThueComPhone).Result;
+      if (phone.Success)
+      {
+        var split = phone?.Sms?.FirstOrDefault().Split('|');
+        if (split != null && split.Length == 3)
+        {
+          Match match = regex_smsCode.Match(split.Last());
+          if (match.Success) return match.Value;
+        }
+      }
+      else WriteLog("GetSimThueComSms: " + phone.Message);
+      return string.Empty;
+    }
+
+    #endregion SimThueCom
 
     #endregion SMS
 
@@ -536,9 +626,11 @@ namespace FacebookGPLX
         string data = twoCaptcha.RecaptchaV2(data_sitekey, "https://attachment.fbsbx.com/captcha/recaptcha/iframe/").Result;
         if (data.StartsWith("OK|"))
         {
+          WriteLog("twoCaptcha.RecaptchaV2: " + data);
           var result = twoCaptcha.WaitResponseJsonCompleted(data.Substring(3), tokenSource.Token).Result;
           if (result.CheckState() == TwoCaptchaState.Success)
           {
+            WriteLog("twoCaptcha.Resolve: Success");
             chromeDriver.ExecuteScript($"document.getElementById('g-recaptcha-response').innerHTML='{result.request}';successCallback('{result.request}');");
             chromeDriver.SwitchTo().ParentFrame();
             return;

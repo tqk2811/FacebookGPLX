@@ -20,12 +20,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TqkLibrary.Adb;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
 using TqkLibrary.Media.Images;
-using Tesseract;
-using Tesseract.Interop;
 
 namespace FacebookGPLX.UI
 {
@@ -40,7 +37,6 @@ namespace FacebookGPLX.UI
     };
 
     private readonly MainWindowViewModel mainWindowViewModel;
-    private readonly System.Timers.Timer timer = new System.Timers.Timer(1000);
 
     public MainWindow()
     {
@@ -60,22 +56,6 @@ namespace FacebookGPLX.UI
       taskQueue.RunRandom = false;
       taskQueue.OnRunComplete += TaskQueue_OnRunComplete;
       taskQueue.OnQueueComplete += TaskQueue_OnQueueComplete;
-      timer.Elapsed += Timer_Elapsed;
-      timer.AutoReset = false;
-      timer.Start();
-    }
-
-    private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-    {
-      try
-      {
-        var devices = BaseAdb.GetDevices().Where(x => !x.EndsWith("\toffline"));
-        mainWindowViewModel.DevicesCount = devices.Count();
-      }
-      catch (Exception)
-      {
-      }
-      timer.Start();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -102,8 +82,12 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100055170846395", PassWord = "THmedia@8888", TwoFA = "4YIN6HQ5OFACUXTHCPRALYDVWMUA4VPG" });//acc bi checkpoint
       //AccountDatas.Add(new AccountData() { UserName = "100055533753481", PassWord = "THmedia@8888", TwoFA = "NZO6R7AWWKYXYI6GGOQTMUVBDYQSPGIZ" });//acc bi checkpoint
       //AccountDatas.Add(new AccountData() { UserName = "100058311460546", PassWord = "THmedia@8386", TwoFA = "VWUOHHI6N4ZMJWUMUWBWMQNH6GZJRE3O" });//acc bi checkpoint
-      //AccountDatas.Add(new AccountData() { UserName = "100058236025901", PassWord = "THmedia@8386", TwoFA = "2D7BZCUSOYZAGGQ5YWS6UJ42ZBPM6UM3" });/ko tim thay nut khang
-      AccountDatas.Add(new AccountData() { UserName = "100058368257568", PassWord = "THmedia@8386", TwoFA = "ZLJ2RHT47XO7PR2C7BR3I3FXZERVMAVQ" });
+      //AccountDatas.Add(new AccountData() { UserName = "100058236025901", PassWord = "THmedia@8386", TwoFA = "2D7BZCUSOYZAGGQ5YWS6UJ42ZBPM6UM3" });//ko tim thay nut khang
+      //AccountDatas.Add(new AccountData() { UserName = "100058368257568", PassWord = "THmedia@8386", TwoFA = "ZLJ2RHT47XO7PR2C7BR3I3FXZERVMAVQ" });//da gui khang
+      //AccountDatas.Add(new AccountData() { UserName = "100058285010119", PassWord = "THmedia@8386", TwoFA = "O3HTL4QXZPD7EY2D2OIRDIQKFNWQYWIE" });//ko tim thay nut khang
+      //AccountDatas.Add(new AccountData() { UserName = "100058712403429", PassWord = "HDvia@6666", TwoFA = "Y6YBXJWXMVYNRZTLH7TZONYGAIUQXO2B" });//not 2FA, mail
+      //AccountDatas.Add(new AccountData() { UserName = "100058765803739", PassWord = "HDvia@8888", TwoFA = "OHFOX5CQXKJGSX7ZXTV3XYIDILBGAGQA" });//sms
+      AccountDatas.Add(new AccountData() { UserName = "100058713244059", PassWord = "HDvia@8888", TwoFA = "3KJETIRIJT4VUD6UBOBEXPDNQFQJ3LTX" });
       //ProxysData.Add("217.163.29.98:35335:phuonglazy:bluecrazy");
       //mainWindowViewModel.AccountCount = AccountDatas.Count;
       //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
@@ -122,7 +106,6 @@ namespace FacebookGPLX.UI
 
     private void TaskQueue_OnRunComplete()
     {
-      timer.Start();
       taskQueue.MaxRun = 0;
       ItemQueue.ResultCheckPoint?.Close();
       ItemQueue.ResultFailed?.Close();
@@ -132,6 +115,7 @@ namespace FacebookGPLX.UI
       ItemQueue.ResultFailed = null;
       ItemQueue.ResultSuccess = null;
       ItemQueue.ResultError = null;
+      mainWindowViewModel.LogCallback("Run Completed");
     }
 
     #endregion taskQueue
@@ -179,8 +163,8 @@ namespace FacebookGPLX.UI
       {
         try
         {
-          //if (Directory.Exists(Extensions.ChromeProfilePath)) Directory.Delete(Extensions.ChromeProfilePath, true);
-          //Directory.CreateDirectory(Extensions.ChromeProfilePath);
+          if (Directory.Exists(Extensions.ChromeProfilePath)) Directory.Delete(Extensions.ChromeProfilePath, true);
+          Directory.CreateDirectory(Extensions.ChromeProfilePath);
         }
         catch (Exception ex)
         {
@@ -194,16 +178,16 @@ namespace FacebookGPLX.UI
         ItemQueue.StopLogAcc = false;
         AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
         ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
-        var devices = BaseAdb.GetDevices().Where(x => !x.EndsWith("\toffline")).ToList();
+        List<string> devices = new List<string>();
+
         for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
         {
-          ItemQueue itemQueue = new ItemQueue(i, mainWindowViewModel.LogCallback, devices[i]);
+          ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
         ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_checkpoint.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
         ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
-        timer.Stop();
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -231,14 +215,13 @@ namespace FacebookGPLX.UI
         ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
         for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
         {
-          ItemQueue itemQueue = new ItemQueue(i, mainWindowViewModel.LogCallback, string.Empty);
+          ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
         ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_checkpoint.txt", true);
         ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_failed.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_success.txt", true);
         ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_error.txt", true);
-        timer.Stop();
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }

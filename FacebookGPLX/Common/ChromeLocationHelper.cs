@@ -10,10 +10,11 @@ namespace FacebookGPLX.Common
 {
   public static class ChromeLocationHelper
   {
-    static int base_TitleAndTaskbar = 30;
-    static RECT RECT;
-    static int window_width = 0;
-    static int window_height = 0;
+    private static int base_TitleAndTaskbar = 30;
+    private static RECT RECT;
+    private static int window_width = 0;
+    private static int window_height = 0;
+
     public static void Init()
     {
       IntPtr desktop = User32.GetDesktopWindow();

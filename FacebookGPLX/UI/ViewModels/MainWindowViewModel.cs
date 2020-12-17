@@ -103,6 +103,24 @@ namespace FacebookGPLX.UI.ViewModels
       set { SettingData.Setting.TwoCaptchaKey = value; SettingData.Save(); NotifyPropertyChange(); }
     }
 
+    public string OtpSimKey
+    {
+      get { return SettingData.Setting.OtpSimKey; }
+      set { SettingData.Setting.OtpSimKey = value; SettingData.Save(); NotifyPropertyChange(); }
+    }
+
+    public string SimThueKey
+    {
+      get { return SettingData.Setting.SimThueKey; }
+      set { SettingData.Setting.SimThueKey = value; SettingData.Save(); NotifyPropertyChange(); }
+    }
+
+    public string ChoThueSimKey
+    {
+      get { return SettingData.Setting.ChoThueSimKey; }
+      set { SettingData.Setting.ChoThueSimKey = value; SettingData.Save(); NotifyPropertyChange(); }
+    }
+
     public SmsService SmsService
     {
       get { return SettingData.Setting.SmsService; }

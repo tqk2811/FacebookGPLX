@@ -11,8 +11,11 @@ namespace FacebookGPLX.Data
 {
   internal enum SmsService
   {
-    Rencode,
-    Saferum
+    None = 0,
+    Rencode = 1,
+    OtpSim = 2,
+    SimThue = 3,
+    ChoThueSim = 4
   }
 
   internal class SettingData
@@ -30,6 +33,9 @@ namespace FacebookGPLX.Data
       = "JMAWHXwulem2fVh0vTShzGLKmzBq3YN1vu30qOXWoYYv";
 
 #endif
+    public string OtpSimKey { get; set; }
+    public string SimThueKey { get; set; }
+    public string ChoThueSimKey { get; set; }
 
     public int DelayStepMin { get; set; } = 2000;
     public int DelayStepMax { get; set; } = 3000;

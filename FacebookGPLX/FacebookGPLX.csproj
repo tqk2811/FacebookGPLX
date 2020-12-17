@@ -51,13 +51,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PInvoke.User32">
+    <Reference Include="PInvoke.User32, Version=0.7.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.User32.dll</HintPath>
     </Reference>
-    <Reference Include="PInvoke.Windows.Core">
+    <Reference Include="PInvoke.Windows.Core, Version=0.7.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.Windows.Core.dll</HintPath>
     </Reference>
-    <Reference Include="PInvoke.Windows.ShellScalingApi">
+    <Reference Include="PInvoke.Windows.ShellScalingApi, Version=0.7.0.0, Culture=neutral, PublicKeyToken=9e300f9f87f04a7a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\PInvoke.Windows.ShellScalingApi.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -106,9 +109,6 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="Tesseract, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Tesseract.4.1.1\lib\net45\Tesseract.dll</HintPath>
     </Reference>
     <Reference Include="TqkLibrary.Media">
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Media.dll</HintPath>
@@ -177,10 +177,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="..\..\..\..\..\..\Github\tessdata_fast\eng.traineddata">
-      <Link>eng.traineddata</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -200,41 +196,7 @@
     <None Include="Resources\setting_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\concrt140.dll">
-      <Link>concrt140.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\cvextern.dll">
-      <Link>cvextern.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\Emgu.CV.World.dll">
-      <Link>Emgu.CV.World.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\msvcp140.dll">
-      <Link>msvcp140.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\opencv_ffmpeg341.dll">
-      <Link>opencv_ffmpeg341.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\opencv_ffmpeg343.dll">
-      <Link>opencv_ffmpeg343.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\..\..\lib\KteamAuto\KAutoHelper V2\Dùng xử lý ảnh\vcruntime140.dll">
-      <Link>vcruntime140.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\message_safeum.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Library\TqkLibrary.Adb\TqkLibrary.Adb.csproj">
-      <Project>{ed75e171-cefe-45ef-b671-7e89b80c0149}</Project>
-      <Name>TqkLibrary.Adb</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets" Condition="Exists('..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets')" />
@@ -243,7 +205,5 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.Chrome.WebDriver.85.0.0\build\Selenium.Chrome.WebDriver.targets'))" />
-    <Error Condition="!Exists('..\packages\Tesseract.4.1.1\build\Tesseract.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract.4.1.1\build\Tesseract.targets'))" />
   </Target>
-  <Import Project="..\packages\Tesseract.4.1.1\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.4.1.1\build\Tesseract.targets')" />
 </Project>

@@ -10,21 +10,21 @@
         Loaded="Window_Loaded"
         mc:Ignorable="d"
         MinHeight="300" MinWidth="650"
-        Title="Facebook GPLX" Height="350" Width="800" WindowStartupLocation="CenterScreen">
+        Title="Facebook GPLX" Height="397" Width="885" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <WpfUiConventers:EnumConventer x:Key="EnumConventer" IsAttributeFlag="False" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
-            <RowDefinition Height="74" />
+            <RowDefinition Height="60" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.RowSpan="2">
+        <Grid>
             <Button x:Name="BT_LoadAccounts" Click="BT_LoadAccounts_Click" Margin="10,5,10,0" VerticalAlignment="Top" Height="20">
                 <TextBlock>
                     <Run Text="Load Accounts (" />
@@ -54,10 +54,12 @@
             <TextBlock HorizontalAlignment="Left" Margin="10,148,0,0" TextWrapping="Wrap" Text="Số lần thử lại:" VerticalAlignment="Top" />
             <WpfUiControls:NumericUpDown NumValue="{Binding ReTryCount}" Min="0" Max="20" Step="1" Margin="120,144,0,0" VerticalAlignment="Top" Width="60" HorizontalAlignment="Left" />
 
-            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,73" VerticalAlignment="Bottom" Width="155" Height="20" />
-            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75" />
-            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check Status Acc" HorizontalAlignment="Left" Margin="5,0,0,48" VerticalAlignment="Bottom" Width="155" />
+            <Button x:Name="BT_Run" Click="BT_Run_Click" Content="Chạy Up GPLX" HorizontalAlignment="Left" Margin="5,0,0,62" VerticalAlignment="Bottom" Width="155" Height="20" />
+            <Button x:Name="BT_Stop" Click="BT_Stop_Click" Content="Dừng" HorizontalAlignment="Right" Margin="0,0,5,5" VerticalAlignment="Bottom" Width="75" />
+            <Button x:Name="BT_Check" Click="BT_Check_Click" Content="Check Status Acc" HorizontalAlignment="Left" Margin="5,0,0,37" VerticalAlignment="Bottom" Width="155" />
             <Button x:Name="BT_StopNext" Click="BT_StopNext_Click" Content="Dừng log acc tiếp theo" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="155" />
+            <TextBlock HorizontalAlignment="Left" Margin="5,173,0,0" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Top" />
+            <TextBox Height="20" Margin="84,171,5,0" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Top" />
         </Grid>
 
         <ListView Grid.Column="1" ItemsSource="{Binding Logs}" Margin="5,5,5,5">
@@ -68,16 +70,23 @@
             </ListView.View>
         </ListView>
 
-        <Grid Grid.Row="1" Grid.Column="1">
-            <RadioButton Content="Saferum" IsChecked="{Binding SmsService,Converter={StaticResource EnumConventer},ConverterParameter={x:Static data:SmsService.Saferum}}" HorizontalAlignment="Left" Margin="5,0,0,59" VerticalAlignment="Bottom" />
-            <TextBlock HorizontalAlignment="Left" Margin="102,-1,0,59" TextWrapping="Wrap" VerticalAlignment="Bottom">
-                <Run Text="Android Devices Count: " />
-                <Run Text="{Binding DevicesCount}" />
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Left" Margin="5,0,0,9" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Bottom" />
-            <TextBox Height="20" Margin="102,0,5,6" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Bottom" />
-            <RadioButton IsChecked="{Binding SmsService,Converter={StaticResource EnumConventer},ConverterParameter={x:Static data:SmsService.Rencode}}" HorizontalAlignment="Left" Margin="5,0,0,35" Content="RentCodeKey:" VerticalAlignment="Bottom" />
-            <TextBox Height="23" Margin="102,0,5,31" Text="{Binding RentCodeKey}" VerticalAlignment="Bottom" />
+        <Grid Grid.Row="1" Grid.Column="1" />
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <RadioButton IsChecked="{Binding SmsService, ConverterParameter={x:Static data:SmsService.Rencode}, Converter={StaticResource EnumConventer}}" HorizontalAlignment="Right" Margin="0,0,20,34" Content="RentCode" VerticalAlignment="Bottom" />
+            <TextBox Height="23" Margin="5,0,96,33" Text="{Binding RentCodeKey}" VerticalAlignment="Bottom" />
+
+            <RadioButton IsChecked="{Binding SmsService, ConverterParameter={x:Static data:SmsService.OtpSim}, Converter={StaticResource EnumConventer}}" Content="OtpSim" Grid.Column="1" HorizontalAlignment="Left" Margin="5,0,0,34" VerticalAlignment="Bottom" />
+            <TextBox Height="23" Margin="75,0,5,33" Text="{Binding OtpSimKey}" VerticalAlignment="Bottom" Grid.Column="1" />
+
+            <RadioButton IsChecked="{Binding SmsService, ConverterParameter={x:Static data:SmsService.SimThue}, Converter={StaticResource EnumConventer}}" Content="SimThue" Grid.Column="1" HorizontalAlignment="Left" Margin="5,0,0,8" VerticalAlignment="Bottom" />
+            <TextBox Height="23" Margin="75,0,5,5" Text="{Binding SimThueKey}" VerticalAlignment="Bottom" Grid.Column="1" />
+
+            <RadioButton IsChecked="{Binding SmsService, ConverterParameter={x:Static data:SmsService.ChoThueSim}, Converter={StaticResource EnumConventer}}" Content="ChoThueSim" HorizontalAlignment="Right" Margin="0,0,5,8" VerticalAlignment="Bottom" />
+            <TextBox Height="23" Margin="5,0,96,5" Text="{Binding ChoThueSimKey}" VerticalAlignment="Bottom" />
         </Grid>
     </Grid>
 </Window>

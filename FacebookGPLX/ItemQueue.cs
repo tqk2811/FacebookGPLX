@@ -10,7 +10,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Tesseract;
 using TqkLibrary.Net.Facebook;
 using TqkLibrary.Queues.TaskQueues;
 using TqkLibrary.SeleniumSupport;
@@ -29,14 +28,14 @@ namespace FacebookGPLX
     public static StreamWriter ResultCheckPoint { get; set; }
     public static List<string> AndroidDevices { get; } = new List<string>();
 
-    private readonly ChromeProfile chromeProfile;
-    private readonly int profile_index = -1;
+    private int index_location = -1;
+    private ChromeProfile chromeProfile;
+    private static int profile_index = 0;
+    private readonly LogCallback logCallback;
 
-    public ItemQueue(int profile_index, LogCallback logCallback, string deviceId)
+    public ItemQueue(LogCallback logCallback)
     {
-      this.profile_index = profile_index;
-      this.chromeProfile = new ChromeProfile("Profile_" + profile_index, deviceId);
-      this.chromeProfile.LogEvent += logCallback;
+      this.logCallback = logCallback;
     }
 
     private void Work()
@@ -46,18 +45,21 @@ namespace FacebookGPLX
         while (true)
         {
           AccountData accountData = null;
+          lock (AccountsQueue)
+          {
+            if (StopLogAcc || AccountsQueue.Count == 0) return;
+            accountData = AccountsQueue.Dequeue();
+            if (index_location == -1) index_location = profile_index;
+            chromeProfile = new ChromeProfile("Profile_" + profile_index++);
+            chromeProfile.LogEvent += logCallback;
+          }
 
           try
           {
-            lock (AccountsQueue)
-            {
-              if (StopLogAcc || AccountsQueue.Count == 0) return;
-              accountData = AccountsQueue.Dequeue();
-            }
 #if DEBUG
-            chromeProfile.OpenChrome(0);
-            chromeProfile.RunAdsManager("", Task.FromResult(0), null);
-            return;
+            //chromeProfile.OpenChrome(0);
+            //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
+            //return;
 #endif
             ProxyHelper proxyHelper = null;
             if (ProxysQueue.Count > 0)
@@ -67,11 +69,11 @@ namespace FacebookGPLX
               {
                 string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
                 ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
-                chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, ext_path);
+                chromeProfile.OpenChrome(index_location, proxyHelper.Proxy, ext_path);
               }
-              else chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, null);
+              else chromeProfile.OpenChrome(index_location, proxyHelper.Proxy, null);
             }
-            else chromeProfile.OpenChrome(profile_index);
+            else chromeProfile.OpenChrome(index_location);
 
             //chromeProfile.ClearCookies();
 
@@ -146,7 +148,7 @@ namespace FacebookGPLX
           }
           finally
           {
-            chromeProfile.ClearCookies();
+            //chromeProfile.ClearCookies();
             chromeProfile.CloseChrome();
             chromeProfile.WriteLog("Close chrome");
           }
@@ -170,6 +172,9 @@ namespace FacebookGPLX
           {
             if (StopLogAcc || AccountsQueue.Count == 0) return;
             accountData = AccountsQueue.Dequeue();
+            if (index_location == -1) index_location = profile_index;
+            chromeProfile = new ChromeProfile("Profile_" + profile_index++);
+            chromeProfile.LogEvent += logCallback;
           }
 
           //string proxy = null;
@@ -180,12 +185,12 @@ namespace FacebookGPLX
             {
               string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
               ProxyLoginExtension.GenerateExtension(ext_path, proxyHelper.Host, proxyHelper.Port, proxyHelper.UserName, proxyHelper.PassWord);
-              chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, ext_path);
+              chromeProfile.OpenChrome(index_location, proxyHelper.Proxy, ext_path);
             }
-            else chromeProfile.OpenChrome(profile_index, proxyHelper.Proxy, null);//set to chrome option
+            else chromeProfile.OpenChrome(index_location, proxyHelper.Proxy, null);//set to chrome option
             //proxy = proxyHelper.Gen();
           }
-          else chromeProfile.OpenChrome(profile_index);
+          else chromeProfile.OpenChrome(index_location);
 
           //chromeProfile.ClearCookies();
 

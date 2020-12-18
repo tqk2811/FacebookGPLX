@@ -1,6 +1,5 @@
 ﻿using FacebookGPLX.Common;
 using FacebookGPLX.Data;
-using KAutoHelper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
@@ -212,19 +211,28 @@ namespace FacebookGPLX
         DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
 
-        while (true)
+        for (int i = 0; i < 2; i++)
         {
-          CheckSomethingWentWrong();
-          CheckEmail();
-          ClickContinue();
-          ClickCaptcha();
-          GetOtpSms();
-          if (UploadImageFile(task, imagePath))
+          int TryTimes = 0;
+          while (TryTimes++ < 6)
           {
+            //CheckSomethingWentWrong();
+            CheckEmail();
             ClickContinue();
-            return;
+            ClickCaptcha();
+            GetOtpSms();
+            if (UploadImageFile(task, imagePath))
+            {
+              ClickContinue();
+              return;
+            }
+            WriteLog($"Try Times {TryTimes}");
           }
+          WriteLog($"SomethingWentWrong");
+          chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+          DelayWeb();
         }
+        throw new ChromeAutoException("Auto failed");
       }
       else throw new ChromeAutoException("Chrome is not open");
     }
@@ -301,19 +309,25 @@ namespace FacebookGPLX
 
     public new void CloseChrome() => base.CloseChrome();
 
-    public void Stop() => tokenSource?.Cancel();
+    public new void Stop() => tokenSource?.Cancel();
 
     private void ClickContinue()
     {
       var eles = chromeDriver.FindElements(By.CssSelector("div[role='button']:not([type='file'])"));
       if (eles.Count != 0)
       {
-        try
+        var ele = eles.Last();
+        if (ele.Enabled && ele.Displayed)
         {
-          eles.Last().Click();
-          DelayWeb();
+          try
+          {
+            WriteLog("Click Continue");
+            ele.Click();
+            DelayWeb();
+          }
+          catch (Exception) { }
         }
-        catch (Exception) { }
+        else WriteLog($"Continue: Enabled {ele.Enabled}, Displayed {ele.Displayed}");
       }
     }
 

@@ -40,8 +40,8 @@ namespace FacebookGPLX.UI
 
     public MainWindow()
     {
-      DateTime dateTime = new DateTime(2021, 2, 1);
-      if (DateTime.Now > dateTime) throw new Exception("");
+      //DateTime dateTime = new DateTime(2021, 2, 1);
+      //if (DateTime.Now > dateTime) throw new Exception("");
 
       Directory.CreateDirectory(Extensions.OutputPath);
       Directory.CreateDirectory(Extensions.ChromeProfilePath);
@@ -155,6 +155,10 @@ namespace FacebookGPLX.UI
     private void BT_Stop_Click(object sender, RoutedEventArgs e)
     {
       taskQueue.ShutDown();
+      using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + "\\DataChuaChay_Stop.txt", true))
+      {
+        ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+      }
     }
 
     private void BT_Run_Click(object sender, RoutedEventArgs e)
@@ -229,6 +233,10 @@ namespace FacebookGPLX.UI
     private void BT_StopNext_Click(object sender, RoutedEventArgs e)
     {
       ItemQueue.StopLogAcc = true;
+      using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + "\\DataChuaChay_StopNext.txt", true))
+      {
+        ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+      }
     }
 
     #endregion Button

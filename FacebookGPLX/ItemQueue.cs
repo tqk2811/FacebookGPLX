@@ -26,7 +26,7 @@ namespace FacebookGPLX
     public static StreamWriter ResultFailed { get; set; }
     public static StreamWriter ResultError { get; set; }
     public static StreamWriter ResultCheckPoint { get; set; }
-    public static List<string> AndroidDevices { get; } = new List<string>();
+    public static StreamWriter ResultCanAds { get; set; }
 
     private int index_location = -1;
     private ChromeProfile chromeProfile;
@@ -75,8 +75,6 @@ namespace FacebookGPLX
             }
             else chromeProfile.OpenChrome(index_location);
 
-            //chromeProfile.ClearCookies();
-
             chromeProfile.RunLogin(accountData);
             string access_token = chromeProfile.GetToken();
             chromeProfile.WriteLog("Access Token: " + access_token);
@@ -113,6 +111,11 @@ namespace FacebookGPLX
           {
             return;
           }
+          catch (AdsException ae)
+          {
+            ResultCanAds?.WriteLine(accountData + "|" + ae.Message);
+            ResultCanAds?.Flush();
+          }
           catch (CheckPointException)
           {
             ResultCheckPoint?.WriteLine(accountData);
@@ -148,7 +151,6 @@ namespace FacebookGPLX
           }
           finally
           {
-            //chromeProfile.ClearCookies();
             chromeProfile.CloseChrome();
             chromeProfile.WriteLog("Close chrome");
           }

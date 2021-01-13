@@ -99,7 +99,7 @@ namespace FacebookGPLX.UI
 
     #region taskQueue
 
-    private void TaskQueue_OnQueueComplete(ItemQueue queue)
+    private void TaskQueue_OnQueueComplete(Task task, ItemQueue queue)
     {
       //throw new NotImplementedException();
     }
@@ -189,6 +189,7 @@ namespace FacebookGPLX.UI
           ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
+        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_KhongCoNutKhang.txt", true);
         ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_checkpoint.txt", true);
         ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
         ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);

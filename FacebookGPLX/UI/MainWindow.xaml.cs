@@ -99,9 +99,11 @@ namespace FacebookGPLX.UI
 
     #region taskQueue
 
+    private readonly object _lock_datachuachay = new object();
+
     private void TaskQueue_OnQueueComplete(Task task, ItemQueue queue)
     {
-      //throw new NotImplementedException();
+      SaveDataChuaChay();
     }
 
     private void TaskQueue_OnRunComplete()
@@ -155,10 +157,7 @@ namespace FacebookGPLX.UI
     private void BT_Stop_Click(object sender, RoutedEventArgs e)
     {
       taskQueue.ShutDown();
-      using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + "\\DataChuaChay_Stop.txt", true))
-      {
-        ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
-      }
+      SaveDataChuaChay();
     }
 
     private void BT_Run_Click(object sender, RoutedEventArgs e)
@@ -189,10 +188,11 @@ namespace FacebookGPLX.UI
           ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
-        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_KhongCoNutKhang.txt", true);
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_checkpoint.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_success.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\UpGPLX_error.txt", true);
+        time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_KhongCoNutKhang_{time}.txt", true);
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_checkpoint_{time}.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_success_{time}.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_error_{time}.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -223,20 +223,31 @@ namespace FacebookGPLX.UI
           ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_checkpoint.txt", true);
-        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_failed.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_success.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + "\\CheckGPLX_error.txt", true);
+        time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_checkpoint_{time}.txt", true);
+        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_failed_{time}.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_success_{time}.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_error_{time}.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
 
+    private string time;
+
     private void BT_StopNext_Click(object sender, RoutedEventArgs e)
     {
       ItemQueue.StopLogAcc = true;
-      using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + "\\DataChuaChay_StopNext.txt", true))
+      SaveDataChuaChay();
+    }
+
+    private void SaveDataChuaChay()
+    {
+      lock (_lock_datachuachay)
       {
-        ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+        using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
+        {
+          ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+        }
       }
     }
 

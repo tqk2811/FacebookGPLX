@@ -358,7 +358,7 @@ namespace FacebookGPLX
       if (eles.Count > 0)
       {
         WriteLog("Resolve Captcha");
-        ResolveCaptcha_New(eles.First());
+        ResolveCaptcha(eles.First());
         ClickContinue();
       }
     }
@@ -374,7 +374,7 @@ namespace FacebookGPLX
         int phoneTry = 0;
         while (phoneTry++ < SettingData.Setting.ReTryCount)
         {
-          eles = chromeDriver.FindElements(By.Name("phone"));
+          eles = WaitUntil(By.Name("phone"), ElementsExists);
           string phoneNumber = GetPhoneNumber();
           if (string.IsNullOrEmpty(phoneNumber))
           {
@@ -407,21 +407,15 @@ namespace FacebookGPLX
           if (string.IsNullOrEmpty(code))
           {
             WriteLog("Get code sms timeout/Exception, try again");
-            eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][aria-label][tabindex='0']"));
-            if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][aria-label][tabindex='0']");
-            eles.First().Click();
+            WaitUntil(By.CssSelector("div[role='button'][aria-label][tabindex='0']"), ElementsExists).First().Click();
             DelayWeb();
             continue;
           }
 
-          eles = chromeDriver.FindElements(By.CssSelector("input[autocomplete='one-time-code']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector input[autocomplete='one-time-code']");
+          WaitUntil(By.CssSelector("input[autocomplete='one-time-code']"), ElementsExists).First().SendKeys(code);
           WriteLog("Sms code: " + code);
-          eles.First().SendKeys(code);
 
-          eles = chromeDriver.FindElements(By.CssSelector("div[role='button'][class*='s1i5eluu']"));
-          if (eles.Count == 0) throw new ChromeAutoException("FindElements By.CssSelector div[role='button'][class*='s1i5eluu']");
-          eles.First().Click();
+          WaitUntil(By.CssSelector("div[role='button'][class*='s1i5eluu']"), ElementsExists).First().Click();
           DelayWeb();
           return;
         }
@@ -631,38 +625,37 @@ namespace FacebookGPLX
       return true;
     }
 
-    private void ResolveCaptcha_New(IWebElement iframe)
+    private void ResolveCaptcha(IWebElement iframe)
     {
-      //string cookies = string.Join(";", chromeDriver.Manage().Cookies.AllCookies.Where(x => x.Domain.Contains(".facebook.com")).Select(x => $"{x.Name}:{x.Value}"));
-      chromeDriver.SwitchTo().Frame(iframe);
-      var eles = chromeDriver.FindElements(By.CssSelector("div[class*='g-recaptcha']"));
-      if (eles.Count == 0) throw new Exception();
-      string data_sitekey = eles.First().GetAttribute("data-sitekey");
-
-      TwoCaptchaApi twoCaptcha = new TwoCaptchaApi(SettingData.Setting.TwoCaptchaKey);
-      int retry = 0;
-      while (retry++ < SettingData.Setting.ReTryCount)
+      using (FrameSwitch frameSwitch = FrameSwitch(iframe))
       {
-        var res = twoCaptcha.RecaptchaV2(data_sitekey, "https://attachment.fbsbx.com/captcha/recaptcha/iframe/").Result;
-        if (res.CheckState() == TwoCaptchaState.Success)
+        var ele = WaitUntil(By.CssSelector("div[class*='g-recaptcha']"), ElementsExists).First();
+        string data_sitekey = ele.GetAttribute("data-sitekey");
+
+        TwoCaptchaApi twoCaptcha = new TwoCaptchaApi(SettingData.Setting.TwoCaptchaKey);
+        int retry = 0;
+        while (retry++ < SettingData.Setting.ReTryCount)
         {
-          WriteLog("twoCaptcha.RecaptchaV2: " + res.request);
-          var result = twoCaptcha.WaitResponseJsonCompleted(res.request, tokenSource.Token).Result;
-          if (result.CheckState() == TwoCaptchaState.Success)
+          var res = twoCaptcha.RecaptchaV2(data_sitekey, "https://attachment.fbsbx.com/captcha/recaptcha/iframe/").Result;
+          if (res.CheckState() == TwoCaptchaState.Success)
           {
-            WriteLog("twoCaptcha.Resolve: Success");
-            chromeDriver.ExecuteScript($"document.getElementById('g-recaptcha-response').innerHTML='{result.request}';successCallback('{result.request}');");
-            chromeDriver.SwitchTo().ParentFrame();
-            return;
-          }
-          else
-          {
-            WriteLog($"TwoCaptcha Failed: {result.request}, Retry:" + retry);
-            continue;
+            WriteLog("twoCaptcha.RecaptchaV2: " + res.request);
+            var result = twoCaptcha.WaitResponseJsonCompleted(res.request, tokenSource.Token).Result;
+            if (result.CheckState() == TwoCaptchaState.Success)
+            {
+              WriteLog("twoCaptcha.Resolve: Success");
+              chromeDriver.ExecuteScript($"document.getElementById('g-recaptcha-response').innerHTML='{result.request}';successCallback('{result.request}');");
+              return;
+            }
+            else
+            {
+              WriteLog($"TwoCaptcha Failed: {result.request}, Retry:" + retry);
+              continue;
+            }
           }
         }
+        throw new ChromeAutoException($"TwoCaptcha Thất bại với {retry} lần thử");
       }
-      throw new ChromeAutoException($"TwoCaptcha Thất bại với {retry} lần thử");
     }
   }
 }

@@ -99,8 +99,6 @@ namespace FacebookGPLX.UI
 
     #region taskQueue
 
-    private readonly object _lock_datachuachay = new object();
-
     private void TaskQueue_OnQueueComplete(Task task, ItemQueue queue)
     {
       SaveDataChuaChay();
@@ -242,12 +240,19 @@ namespace FacebookGPLX.UI
 
     private void SaveDataChuaChay()
     {
-      lock (_lock_datachuachay)
+      try
       {
-        using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
+        lock (ItemQueue.AccountsQueue)
         {
-          ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+          using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
+          {
+            ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
+          }
         }
+      }
+      catch(Exception)
+      {
+
       }
     }
 

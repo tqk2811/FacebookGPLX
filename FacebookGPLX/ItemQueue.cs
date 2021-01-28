@@ -44,18 +44,19 @@ namespace FacebookGPLX
       {
         while (true)
         {
-          AccountData accountData = null;
-          lock (AccountsQueue)
-          {
-            if (StopLogAcc || AccountsQueue.Count == 0) return;
-            accountData = AccountsQueue.Dequeue();
-            if (index_location == -1) index_location = profile_index;
-            chromeProfile = new ChromeProfile("Profile_" + profile_index++);
-            chromeProfile.LogEvent += logCallback;
-          }
+          AccountData accountData = null;          
 
           try
           {
+            lock (AccountsQueue)
+            {
+              if (StopLogAcc || AccountsQueue.Count == 0) return;
+              if (AccountsQueue.Count == 0) return;
+              accountData = AccountsQueue.Dequeue();
+              if (index_location == -1) index_location = profile_index;
+              chromeProfile = new ChromeProfile("Profile_" + profile_index++);
+              chromeProfile.LogEvent += logCallback;
+            }
 #if DEBUG
             //chromeProfile.OpenChrome(0);
             //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
@@ -107,9 +108,10 @@ namespace FacebookGPLX
             ResultSuccess?.Flush();
             File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
           }
-          catch (OperationCanceledException)
+          catch (OperationCanceledException oce)
           {
-            return;
+            if(chromeProfile.Token.IsCancellationRequested) return;
+            chromeProfile.WriteLog("OperationCanceledException:" + accountData + $"| {oce.StackTrace}");
           }
           catch (AdsException ae)
           {
@@ -173,6 +175,7 @@ namespace FacebookGPLX
           lock (AccountsQueue)
           {
             if (StopLogAcc || AccountsQueue.Count == 0) return;
+            if (AccountsQueue.Count == 0) return;
             accountData = AccountsQueue.Dequeue();
             if (index_location == -1) index_location = profile_index;
             chromeProfile = new ChromeProfile("Profile_" + profile_index++);

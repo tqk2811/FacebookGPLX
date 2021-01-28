@@ -155,7 +155,6 @@ namespace FacebookGPLX.UI
     private void BT_Stop_Click(object sender, RoutedEventArgs e)
     {
       taskQueue.ShutDown();
-      SaveDataChuaChay();
     }
 
     private void BT_Run_Click(object sender, RoutedEventArgs e)
@@ -235,7 +234,6 @@ namespace FacebookGPLX.UI
     private void BT_StopNext_Click(object sender, RoutedEventArgs e)
     {
       ItemQueue.StopLogAcc = true;
-      SaveDataChuaChay();
     }
 
     private void SaveDataChuaChay()

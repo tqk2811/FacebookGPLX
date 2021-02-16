@@ -124,8 +124,8 @@ namespace FacebookGPLX
         WriteLog("PassWord: " + accountData.PassWord);
         eles.First().SendKeys(accountData.PassWord);
 
-        eles = chromeDriver.FindElements(By.Id("u_0_b"));
-        if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id u_0_b");
+        eles = chromeDriver.FindElements(By.Name("login"));
+        if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Name login");
         eles.First().Click();
         WaitUntil(By.TagName("body"), ElementsExists);
 
@@ -215,9 +215,9 @@ namespace FacebookGPLX
         WriteLog("Check Account Quality");
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
         WaitUntil(By.TagName("body"), ElementsExists);
-
+        DelayStep();
         var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
-        if (eles.Count == 0) chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
+        if (eles.Count == 0) eles = chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
         if (eles.Count == 0)
           throw new AdsException("Không tìm thấy nút kháng nghị");
         eles.First().Click();
@@ -256,6 +256,7 @@ namespace FacebookGPLX
     {
       chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
       WaitUntil(By.TagName("body"), ElementsExists);
+      DelayStep();
       //tam giac cham than : -webkit-mask-position 0px -197px
 
       if (chromeDriver.FindElements(By.CssSelector("div[class='jwy3ehce'][style*='0px -292px;']")).Count == 0)

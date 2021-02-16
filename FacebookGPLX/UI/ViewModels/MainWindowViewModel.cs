@@ -11,16 +11,16 @@ using TqkLibrary.WpfUi.ObservableCollection;
 
 namespace FacebookGPLX.UI.ViewModels
 {
-  internal class MainWindowViewModel : BaseViewModel
+  public class MainWindowViewModel : BaseViewModel
   {
-    private readonly Dispatcher dispatcher;
-
-    public MainWindowViewModel(Dispatcher dispatcher)
+    public MainWindowViewModel(Dispatcher dispatcher) :base(dispatcher)
     {
-      this.dispatcher = dispatcher;
     }
 
-    public void LogCallback(string text) => dispatcher.Invoke(() => Logs.Add(text));
+    public void LogCallback(string text)
+    {
+      dispatcher.Invoke(() => Logs.Add(text));
+    }
 
     private int _AccountCount = 0;
 

@@ -9,7 +9,7 @@ using System.Timers;
 
 namespace FacebookGPLX.Data
 {
-  internal enum SmsService
+  public enum SmsService
   {
     None = 0,
     Rencode = 1,

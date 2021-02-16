@@ -51,7 +51,6 @@ namespace FacebookGPLX
             lock (AccountsQueue)
             {
               if (StopLogAcc || AccountsQueue.Count == 0) return;
-              if (AccountsQueue.Count == 0) return;
               accountData = AccountsQueue.Dequeue();
               if (index_location == -1) index_location = profile_index;
               chromeProfile = new ChromeProfile("Profile_" + profile_index++);
@@ -175,7 +174,6 @@ namespace FacebookGPLX
           lock (AccountsQueue)
           {
             if (StopLogAcc || AccountsQueue.Count == 0) return;
-            if (AccountsQueue.Count == 0) return;
             accountData = AccountsQueue.Dequeue();
             if (index_location == -1) index_location = profile_index;
             chromeProfile = new ChromeProfile("Profile_" + profile_index++);
@@ -261,6 +259,11 @@ namespace FacebookGPLX
     {
       if (RunFlag) return Task.Factory.StartNew(Work, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
       else return Task.Factory.StartNew(WorkCheck, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
+    public void Dispose()
+    {
+      //throw new NotImplementedException();
     }
 
     #endregion IQueue

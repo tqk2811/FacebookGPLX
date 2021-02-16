@@ -38,10 +38,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MaterialDesignColors">
+    <Reference Include="MaterialDesignColors, Version=1.2.7.1979, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\MaterialDesignColors.dll</HintPath>
     </Reference>
-    <Reference Include="MaterialDesignThemes.Wpf">
+    <Reference Include="MaterialDesignThemes.Wpf, Version=3.2.0.1979, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -107,19 +109,24 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TqkLibrary.Media">
+    <Reference Include="TqkLibrary.Media, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Media.dll</HintPath>
     </Reference>
-    <Reference Include="TqkLibrary.Net">
+    <Reference Include="TqkLibrary.Net, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Net.dll</HintPath>
     </Reference>
-    <Reference Include="TqkLibrary.Queues">
+    <Reference Include="TqkLibrary.Queues, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.Queues.dll</HintPath>
     </Reference>
-    <Reference Include="TqkLibrary.SeleniumSupport">
+    <Reference Include="TqkLibrary.SeleniumSupport, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.SeleniumSupport.dll</HintPath>
     </Reference>
-    <Reference Include="TqkLibrary.WpfUi">
+    <Reference Include="TqkLibrary.WpfUi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\TqkLibrary\bin\Release\net462\TqkLibrary.WpfUi.dll</HintPath>
     </Reference>
     <Reference Include="TwoFactorAuth.Net, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">

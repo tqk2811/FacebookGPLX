@@ -52,7 +52,6 @@ namespace FacebookGPLX.UI
       mainWindowViewModel = new MainWindowViewModel(this.Dispatcher);
       this.DataContext = mainWindowViewModel;
       InitializeComponent();
-      taskQueue.Dispatcher = this.Dispatcher;
       taskQueue.RunRandom = false;
       taskQueue.OnRunComplete += TaskQueue_OnRunComplete;
       taskQueue.OnQueueComplete += TaskQueue_OnQueueComplete;
@@ -106,16 +105,25 @@ namespace FacebookGPLX.UI
 
     private void TaskQueue_OnRunComplete()
     {
-      taskQueue.MaxRun = 0;
-      ItemQueue.ResultCheckPoint?.Close();
-      ItemQueue.ResultFailed?.Close();
-      ItemQueue.ResultSuccess?.Close();
-      ItemQueue.ResultError?.Close();
-      ItemQueue.ResultCheckPoint = null;
-      ItemQueue.ResultFailed = null;
-      ItemQueue.ResultSuccess = null;
-      ItemQueue.ResultError = null;
-      mainWindowViewModel.LogCallback("Run Completed");
+      try
+      {
+        taskQueue.MaxRun = 0;
+        ItemQueue.ResultCheckPoint?.Close();
+        ItemQueue.ResultFailed?.Close();
+        ItemQueue.ResultSuccess?.Close();
+        ItemQueue.ResultError?.Close();
+        ItemQueue.ResultCanAds?.Close();
+        ItemQueue.ResultCheckPoint = null;
+        ItemQueue.ResultFailed = null;
+        ItemQueue.ResultSuccess = null;
+        ItemQueue.ResultError = null;
+        ItemQueue.ResultCanAds = null;
+        mainWindowViewModel.LogCallback("Run Completed");
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message + ex.StackTrace, ex.GetType().FullName);
+      }
     }
 
     #endregion taskQueue
@@ -240,12 +248,12 @@ namespace FacebookGPLX.UI
     {
       try
       {
-        lock (ItemQueue.AccountsQueue)
+        List<AccountData> clone = null;
+        lock (ItemQueue.AccountsQueue) clone = ItemQueue.AccountsQueue.ToList();
+
+        using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
         {
-          using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
-          {
-            ItemQueue.AccountsQueue.ToList().ForEach(x => streamWriter.WriteLine(x));
-          }
+          clone.ForEach(x => streamWriter.WriteLine(x));
         }
       }
       catch(Exception)

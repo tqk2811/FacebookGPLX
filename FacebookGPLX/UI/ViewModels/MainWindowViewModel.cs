@@ -57,74 +57,74 @@ namespace FacebookGPLX.UI.ViewModels
 
     public int MaxRun
     {
-      get { return SettingData.Setting.MaxRun; }
-      set { SettingData.Setting.MaxRun = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.MaxRun; }
+      set { Extensions.Setting.Setting.MaxRun = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public int DelayStepMin
     {
-      get { return SettingData.Setting.DelayStepMin; }
-      set { SettingData.Setting.DelayStepMin = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.DelayStepMin; }
+      set { Extensions.Setting.Setting.DelayStepMin = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public int DelayStepMax
     {
-      get { return SettingData.Setting.DelayStepMax; }
-      set { SettingData.Setting.DelayStepMax = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.DelayStepMax; }
+      set { Extensions.Setting.Setting.DelayStepMax = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public int DelayWebMin
     {
-      get { return SettingData.Setting.DelayWebMin; }
-      set { SettingData.Setting.DelayWebMin = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.DelayWebMin; }
+      set { Extensions.Setting.Setting.DelayWebMin = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public int DelayWebMax
     {
-      get { return SettingData.Setting.DelayWebMax; }
-      set { SettingData.Setting.DelayWebMax = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.DelayWebMax; }
+      set { Extensions.Setting.Setting.DelayWebMax = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public int ReTryCount
     {
-      get { return SettingData.Setting.ReTryCount; }
-      set { SettingData.Setting.ReTryCount = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.ReTryCount; }
+      set { Extensions.Setting.Setting.ReTryCount = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public string RentCodeKey
     {
-      get { return SettingData.Setting.RentCodeKey; }
-      set { SettingData.Setting.RentCodeKey = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.RentCodeKey; }
+      set { Extensions.Setting.Setting.RentCodeKey = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public string TwoCaptchaKey
     {
-      get { return SettingData.Setting.TwoCaptchaKey; }
-      set { SettingData.Setting.TwoCaptchaKey = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.TwoCaptchaKey; }
+      set { Extensions.Setting.Setting.TwoCaptchaKey = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public string OtpSimKey
     {
-      get { return SettingData.Setting.OtpSimKey; }
-      set { SettingData.Setting.OtpSimKey = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.OtpSimKey; }
+      set { Extensions.Setting.Setting.OtpSimKey = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public string SimThueKey
     {
-      get { return SettingData.Setting.SimThueKey; }
-      set { SettingData.Setting.SimThueKey = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.SimThueKey; }
+      set { Extensions.Setting.Setting.SimThueKey = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public string ChoThueSimKey
     {
-      get { return SettingData.Setting.ChoThueSimKey; }
-      set { SettingData.Setting.ChoThueSimKey = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.ChoThueSimKey; }
+      set { Extensions.Setting.Setting.ChoThueSimKey = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     public SmsService SmsService
     {
-      get { return SettingData.Setting.SmsService; }
-      set { SettingData.Setting.SmsService = value; SettingData.Save(); NotifyPropertyChange(); }
+      get { return Extensions.Setting.Setting.SmsService; }
+      set { Extensions.Setting.Setting.SmsService = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
     #endregion Save

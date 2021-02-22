@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,6 +34,8 @@ namespace FacebookGPLX
     private static int profile_index = 0;
     private readonly LogCallback logCallback;
 
+    bool IsWork = true;
+
     public ItemQueue(LogCallback logCallback)
     {
       this.logCallback = logCallback;
@@ -42,7 +45,7 @@ namespace FacebookGPLX
     {
       try
       {
-        while (true)
+        while (IsWork)
         {
           AccountData accountData = null;          
 
@@ -152,6 +155,7 @@ namespace FacebookGPLX
           }
           finally
           {
+            SaveDataChuaChay();
             chromeProfile.CloseChrome();
             chromeProfile.WriteLog("Close chrome");
           }
@@ -239,6 +243,7 @@ namespace FacebookGPLX
         }
         finally
         {
+          SaveDataChuaChay();
           chromeProfile.ClearCookies();
           chromeProfile.CloseChrome();
           chromeProfile.WriteLog("Close chrome");
@@ -246,12 +251,39 @@ namespace FacebookGPLX
       }
     }
 
+    static readonly object _lock_write = new object();
+    private void SaveDataChuaChay()
+    {
+      try
+      {
+        List<AccountData> clone = null;
+        lock (ItemQueue.AccountsQueue) clone = ItemQueue.AccountsQueue.ToList();
+
+        lock (_lock_write)
+        {
+          using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext.txt", false))
+          {
+            clone.ForEach(x => streamWriter.WriteLine(x));
+          }
+        }
+      }
+      catch (Exception)
+      {
+
+      }
+    }
+
+
     #region IQueue
 
     public bool IsPrioritize => false;
     public bool ReQueue => false;
 
-    public void Cancel() => chromeProfile.Stop();
+    public void Cancel()
+    {
+      IsWork = false;
+      chromeProfile?.Stop();
+    }
 
     public bool CheckEquals(IQueue queue) => this.Equals(queue);
 

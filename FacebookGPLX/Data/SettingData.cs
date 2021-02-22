@@ -43,32 +43,5 @@ namespace FacebookGPLX.Data
     public int DelayWebMax { get; set; } = 8000;
     public int ReTryCount { get; set; } = 5;
     public SmsService SmsService { get; set; } = SmsService.Rencode;
-
-    private static readonly string SettingPath = Extensions.ExeFolderPath + "\\Setting.json";
-
-    public static void Load()
-    {
-      if (Setting == null)
-      {
-        timer.Elapsed += Timer_Elapsed;
-        if (File.Exists(SettingPath)) Setting = JsonConvert.DeserializeObject<SettingData>(File.ReadAllText(SettingPath));
-        else
-        {
-          Setting = new SettingData();
-          Save();
-        }
-      }
-    }
-
-    private static void Timer_Elapsed(object sender, ElapsedEventArgs e) => File.WriteAllText(SettingPath, JsonConvert.SerializeObject(Setting));
-
-    public static void Save()
-    {
-      timer.Stop();
-      timer.Start();
-    }
-
-    public static SettingData Setting { get; private set; }
-    private static readonly Timer timer = new Timer(500);
   }
 }

@@ -40,21 +40,16 @@ namespace FacebookGPLX.UI
 
     public MainWindow()
     {
-      //DateTime dateTime = new DateTime(2021, 2, 1);
-      //if (DateTime.Now > dateTime) throw new Exception("");
-
       Directory.CreateDirectory(Extensions.OutputPath);
       Directory.CreateDirectory(Extensions.ChromeProfilePath);
       Directory.CreateDirectory(Extensions.ImageSuccess);
       Directory.CreateDirectory(Extensions.DebugData);
-      SettingData.Load();
       UserAgent.Load(Extensions.ExeFolderPath + "\\UAs.txt");
       mainWindowViewModel = new MainWindowViewModel(this.Dispatcher);
       this.DataContext = mainWindowViewModel;
       InitializeComponent();
       taskQueue.RunRandom = false;
       taskQueue.OnRunComplete += TaskQueue_OnRunComplete;
-      taskQueue.OnQueueComplete += TaskQueue_OnQueueComplete;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -86,7 +81,7 @@ namespace FacebookGPLX.UI
       //AccountDatas.Add(new AccountData() { UserName = "100058285010119", PassWord = "THmedia@8386", TwoFA = "O3HTL4QXZPD7EY2D2OIRDIQKFNWQYWIE" });//ko tim thay nut khang
       //AccountDatas.Add(new AccountData() { UserName = "100058712403429", PassWord = "HDvia@6666", TwoFA = "Y6YBXJWXMVYNRZTLH7TZONYGAIUQXO2B" });//not 2FA, mail
       //AccountDatas.Add(new AccountData() { UserName = "100058765803739", PassWord = "HDvia@8888", TwoFA = "OHFOX5CQXKJGSX7ZXTV3XYIDILBGAGQA" });//sms
-      AccountDatas.Add(new AccountData() { UserName = "100058713244059", PassWord = "HDvia@8888", TwoFA = "3KJETIRIJT4VUD6UBOBEXPDNQFQJ3LTX" });
+      //AccountDatas.Add(new AccountData() { UserName = "100061606642511", PassWord = "HDvia@8888", TwoFA = "ZKM7QJ2JZXAWFESXM3YGFJUMPTMXPR77" });
       //ProxysData.Add("217.163.29.98:35335:phuonglazy:bluecrazy");
       //mainWindowViewModel.AccountCount = AccountDatas.Count;
       //Bitmap bitmap = (Bitmap)Bitmap.FromFile("D:\\c.png");
@@ -98,10 +93,6 @@ namespace FacebookGPLX.UI
 
     #region taskQueue
 
-    private void TaskQueue_OnQueueComplete(Task task, ItemQueue queue)
-    {
-      SaveDataChuaChay();
-    }
 
     private void TaskQueue_OnRunComplete()
     {
@@ -194,10 +185,10 @@ namespace FacebookGPLX.UI
           taskQueue.Add(itemQueue);
         }
         time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_KhongCoNutKhang_{time}.txt", true);
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_checkpoint_{time}.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_success_{time}.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_error_{time}.txt", true);
+        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_KhongCoNutKhang.txt", true);
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_checkpoint.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_success.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_error.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -229,10 +220,10 @@ namespace FacebookGPLX.UI
           taskQueue.Add(itemQueue);
         }
         time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_checkpoint_{time}.txt", true);
-        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_failed_{time}.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_success_{time}.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_error_{time}.txt", true);
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_checkpoint.txt", true);
+        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_failed.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_success_.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_error.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -244,23 +235,6 @@ namespace FacebookGPLX.UI
       ItemQueue.StopLogAcc = true;
     }
 
-    private void SaveDataChuaChay()
-    {
-      try
-      {
-        List<AccountData> clone = null;
-        lock (ItemQueue.AccountsQueue) clone = ItemQueue.AccountsQueue.ToList();
-
-        using (StreamWriter streamWriter = new StreamWriter(Extensions.OutputPath + $"\\DataChuaChay_StopNext_{time}.txt", false))
-        {
-          clone.ForEach(x => streamWriter.WriteLine(x));
-        }
-      }
-      catch(Exception)
-      {
-
-      }
-    }
 
     #endregion Button
   }

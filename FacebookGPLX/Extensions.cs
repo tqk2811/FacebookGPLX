@@ -1,9 +1,10 @@
-﻿using System;
+﻿using FacebookGPLX.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using TqkLibrary.WpfUi;
 namespace FacebookGPLX
 {
   internal static class Extensions
@@ -29,5 +30,7 @@ namespace FacebookGPLX
       const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       return new string(Enumerable.Repeat(chars, rd.Next(min, max + 1)).Select(s => s[rd.Next(s.Length)]).ToArray());
     }
+
+    public static SaveSettingData<SettingData> Setting { get; } = new SaveSettingData<SettingData>(WpfUiExtensions.ExeFolderPath + "\\Setting.json");
   }
 }

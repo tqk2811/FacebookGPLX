@@ -87,9 +87,9 @@ namespace FacebookGPLX
       return options;
     }
 
-    private void DelayWeb() => Delay(SettingData.Setting.DelayWebMin, SettingData.Setting.DelayWebMax);
+    private void DelayWeb() => Delay(Extensions.Setting.Setting.DelayWebMin, Extensions.Setting.Setting.DelayWebMax);
 
-    private void DelayStep() => Delay(SettingData.Setting.DelayStepMin, SettingData.Setting.DelayStepMax);
+    private void DelayStep() => Delay(Extensions.Setting.Setting.DelayStepMin, Extensions.Setting.Setting.DelayStepMax);
 
     public void WriteLog(string log)
     {
@@ -215,14 +215,15 @@ namespace FacebookGPLX
         WriteLog("Check Account Quality");
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
         WaitUntil(By.TagName("body"), ElementsExists);
-        DelayStep();
+        DelayWeb();
         var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
         if (eles.Count == 0) eles = chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
         if (eles.Count == 0)
           throw new AdsException("Không tìm thấy nút kháng nghị");
         eles.First().Click();
         WaitUntil(By.TagName("body"), ElementsExists);
-        DelayStep();
+        var token = this.Token;
+        DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/"))
           throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
 
@@ -234,6 +235,7 @@ namespace FacebookGPLX
             //CheckSomethingWentWrong();
             CheckEmail();
             ClickContinue();
+            GetOtpSms();
             ClickCaptcha();
             GetOtpSms();
             if (UploadImageFile(task, imagePath))
@@ -256,10 +258,10 @@ namespace FacebookGPLX
     {
       chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
       WaitUntil(By.TagName("body"), ElementsExists);
-      DelayStep();
+      DelayWeb();
       //tam giac cham than : -webkit-mask-position 0px -197px
 
-      if (chromeDriver.FindElements(By.CssSelector("div[class='jwy3ehce'][style*='0px -292px;']")).Count == 0)
+      if (chromeDriver.FindElements(By.CssSelector("div[class*='jwy3ehce'][style*='0px -292px;']")).Count == 0)
         return AdsResult.Failed;
       else return AdsResult.Success;
     }
@@ -373,7 +375,7 @@ namespace FacebookGPLX
       {
         WriteLog("Get Code From Phone Number");
         int phoneTry = 0;
-        while (phoneTry++ < SettingData.Setting.ReTryCount)
+        while (phoneTry++ < Extensions.Setting.Setting.ReTryCount)
         {
           eles = WaitUntil(By.Name("phone"), ElementsExists);
           string phoneNumber = GetPhoneNumber();
@@ -385,6 +387,11 @@ namespace FacebookGPLX
           }
 
           WriteLog("Phone Number: " + phoneNumber);
+          try
+          {
+            eles.First().Clear();
+          }
+          catch (Exception) { }
           eles.First().SendKeys(phoneNumber);
 
           ClickContinue();
@@ -426,7 +433,7 @@ namespace FacebookGPLX
 
     private string GetPhoneNumber()
     {
-      switch (SettingData.Setting.SmsService)
+      switch (Extensions.Setting.Setting.SmsService)
       {
         case SmsService.Rencode: return GetRencodePhone();
         case SmsService.ChoThueSim: return GetChoThueSimCodePhone();
@@ -438,7 +445,7 @@ namespace FacebookGPLX
 
     private string GetSms()
     {
-      switch (SettingData.Setting.SmsService)
+      switch (Extensions.Setting.Setting.SmsService)
       {
         case SmsService.Rencode: return GetRencodeSms();
         case SmsService.ChoThueSim: return GetChoThueSimCodeSms();
@@ -454,7 +461,7 @@ namespace FacebookGPLX
 
     private string GetRencodePhone()
     {
-      RentCodeApi rentCode = new RentCodeApi(SettingData.Setting.RentCodeKey);
+      RentCodeApi rentCode = new RentCodeApi(Extensions.Setting.Setting.RentCodeKey);
       RentCodeResult rentCodeResult = rentCode.Request(1, false, NetworkProvider.Viettel).Result;
       if (rentCodeResult.Id == null || rentCodeResult.Success != true)
       {
@@ -474,7 +481,7 @@ namespace FacebookGPLX
 
     private string GetRencodeSms()
     {
-      RentCodeApi rentCode = new RentCodeApi(SettingData.Setting.RentCodeKey);
+      RentCodeApi rentCode = new RentCodeApi(Extensions.Setting.Setting.RentCodeKey);
       var rentCodeCheckOrderResults = rentCode.Check(rentCodeResult).Result;
       string code = string.Empty;
       if (rentCodeCheckOrderResults.Success && rentCodeCheckOrderResults.Messages?.Count > 0)
@@ -500,7 +507,7 @@ namespace FacebookGPLX
 
     private string GetOtpSimPhone()
     {
-      OtpSimApi otpSimApi = new OtpSimApi(SettingData.Setting.OtpSimKey);
+      OtpSimApi otpSimApi = new OtpSimApi(Extensions.Setting.Setting.OtpSimKey);
       var phone = otpSimApi.PhonesRequest(new DataService() { Id = 7 }).Result;
       if (phone.Success && phone.StatusCode == StatusCode.Success)
       {
@@ -516,7 +523,7 @@ namespace FacebookGPLX
 
     private string GetOtpSimSms()
     {
-      OtpSimApi otpSimApi = new OtpSimApi(SettingData.Setting.OtpSimKey);
+      OtpSimApi otpSimApi = new OtpSimApi(Extensions.Setting.Setting.OtpSimKey);
       var message = otpSimApi.GetPhoneMessage(OtpSimBaseResult.Data).Result;
       if (message.Success && message.StatusCode == StatusCode.Success)
       {
@@ -537,7 +544,7 @@ namespace FacebookGPLX
 
     private string GetChoThueSimCodePhone()
     {
-      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(SettingData.Setting.ChoThueSimKey);
+      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(Extensions.Setting.Setting.ChoThueSimKey);
       var phone = choThueSimCodeApi.GetPhoneNumber(1001).Result;
       if (phone.ResponseCode == ResponseCodeGetPhoneNumber.Success)
       {
@@ -553,7 +560,7 @@ namespace FacebookGPLX
 
     private string GetChoThueSimCodeSms()
     {
-      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(SettingData.Setting.ChoThueSimKey);
+      ChoThueSimCodeApi choThueSimCodeApi = new ChoThueSimCodeApi(Extensions.Setting.Setting.ChoThueSimKey);
       var message = choThueSimCodeApi.GetMessage(ChoThueSimCodePhone.Result).Result;
       if (message.ResponseCode == ResponseCodeMessage.Success)
       {
@@ -574,7 +581,7 @@ namespace FacebookGPLX
 
     private string GetSimThueComPhone()
     {
-      SimThueApi simThueApi = new SimThueApi(SettingData.Setting.SimThueKey);
+      SimThueApi simThueApi = new SimThueApi(Extensions.Setting.Setting.SimThueKey);
       var request = simThueApi.CreateRequest(new ServiceResult() { Id = 9 }).Result;
       if (request.Success)
       {
@@ -593,7 +600,7 @@ namespace FacebookGPLX
 
     private string GetSimThueComSms()
     {
-      SimThueApi simThueApi = new SimThueApi(SettingData.Setting.SimThueKey);
+      SimThueApi simThueApi = new SimThueApi(Extensions.Setting.Setting.SimThueKey);
       var phone = simThueApi.CheckRequest(SimThueComPhone).Result;
       if (phone.Success)
       {
@@ -633,9 +640,9 @@ namespace FacebookGPLX
         var ele = WaitUntil(By.CssSelector("div[class*='g-recaptcha']"), ElementsExists).First();
         string data_sitekey = ele.GetAttribute("data-sitekey");
 
-        TwoCaptchaApi twoCaptcha = new TwoCaptchaApi(SettingData.Setting.TwoCaptchaKey);
+        TwoCaptchaApi twoCaptcha = new TwoCaptchaApi(Extensions.Setting.Setting.TwoCaptchaKey);
         int retry = 0;
-        while (retry++ < SettingData.Setting.ReTryCount)
+        while (retry++ < Extensions.Setting.Setting.ReTryCount)
         {
           var res = twoCaptcha.RecaptchaV2(data_sitekey, "https://attachment.fbsbx.com/captcha/recaptcha/iframe/").Result;
           if (res.CheckState() == TwoCaptchaState.Success)

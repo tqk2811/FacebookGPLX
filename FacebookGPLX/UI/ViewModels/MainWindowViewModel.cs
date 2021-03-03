@@ -13,7 +13,7 @@ namespace FacebookGPLX.UI.ViewModels
 {
   public class MainWindowViewModel : BaseViewModel
   {
-    public MainWindowViewModel(Dispatcher dispatcher) :base(dispatcher)
+    public MainWindowViewModel(Dispatcher dispatcher) : base(dispatcher)
     {
     }
 
@@ -52,6 +52,13 @@ namespace FacebookGPLX.UI.ViewModels
       get { return _DevicesCount; }
       set { _DevicesCount = value; NotifyPropertyChange(); }
     }
+
+    public List<ComboBoxViewModel> CbbData { get; } = new List<ComboBoxViewModel>()
+    {
+      new ComboBoxViewModel(TypeRun.V1),
+      new ComboBoxViewModel(TypeRun.V2)
+    };
+
 
     #region Save
 
@@ -127,6 +134,12 @@ namespace FacebookGPLX.UI.ViewModels
       set { Extensions.Setting.Setting.SmsService = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
     }
 
+
+    public TypeRun TypeRun
+    {
+      get { return Extensions.Setting.Setting.TypeRun; }
+      set { Extensions.Setting.Setting.TypeRun = value; Extensions.Setting.Save(); NotifyPropertyChange(); }
+    }
     #endregion Save
   }
 }

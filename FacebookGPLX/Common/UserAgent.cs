@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FacebookGPLX.Common
 {
@@ -14,20 +15,21 @@ namespace FacebookGPLX.Common
     static readonly Random rd = new Random();
     public static void Load(string filePath)
     {
-      if(File.Exists(filePath))
+      if (File.Exists(filePath))
       {
         var lines = File.ReadAllLines(filePath);
-        int i =1;
-        for(;i < lines.Count(); i++)
+        int i = 1;
+        for (; i < lines.Count(); i++)
         {
           if (lines[i].StartsWith("#")) break;
           Oss.Add(lines[i]);
         }
-        for (i++ ; i < lines.Count(); i++)
+        for (i++; i < lines.Count(); i++)
         {
           Uas.Add(lines[i]);
         }
       }
+      else MessageBox.Show(filePath, "File Not Found");
     }
     public static string GetRandom() => Uas[rd.Next(Uas.Count)].Replace("{os}", Oss[rd.Next(Oss.Count)]);
   }

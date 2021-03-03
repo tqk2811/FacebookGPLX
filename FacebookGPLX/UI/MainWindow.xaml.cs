@@ -54,6 +54,7 @@ namespace FacebookGPLX.UI
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+      cbb.SelectedIndex = (int)Extensions.Setting.Setting.TypeRun;
 #if DEBUG
       //ChromeProfile chromeProfile = new ChromeProfile("Test");
       //chromeProfile.TestCaptcha();
@@ -162,8 +163,10 @@ namespace FacebookGPLX.UI
       {
         try
         {
+#if RELEASE
           if (Directory.Exists(Extensions.ChromeProfilePath)) Directory.Delete(Extensions.ChromeProfilePath, true);
           Directory.CreateDirectory(Extensions.ChromeProfilePath);
+#endif
         }
         catch (Exception ex)
         {
@@ -173,10 +176,10 @@ namespace FacebookGPLX.UI
         ChromeLocationHelper.Init();
         ItemQueue.RunFlag = true;
         ItemQueue.AccountsQueue.Clear();
-        ItemQueue.ProxysQueue.Clear();
+        ItemQueue.ProxysList.Clear();
+        ItemQueue.ProxysList.AddRange(ProxysData);
         ItemQueue.StopLogAcc = false;
         AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
-        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
         List<string> devices = new List<string>();
 
         for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
@@ -185,10 +188,10 @@ namespace FacebookGPLX.UI
           taskQueue.Add(itemQueue);
         }
         time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_KhongCoNutKhang.txt", true);
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_checkpoint.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_success.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\{time}_UpGPLX_error.txt", true);
+        ItemQueue.ResultCanAds = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_KhongCoNutKhang_{time}.txt", true);
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_checkpoint_{time}.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_success_{time}.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\UpGPLX_error_{time}.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -210,20 +213,20 @@ namespace FacebookGPLX.UI
         ChromeLocationHelper.Init();
         ItemQueue.StopLogAcc = false;
         ItemQueue.RunFlag = false;
-        ItemQueue.ProxysQueue.Clear();
+        ItemQueue.ProxysList.Clear();
+        ItemQueue.ProxysList.AddRange(ProxysData);
         ItemQueue.AccountsQueue.Clear();
         AccountDatas.ForEach(x => ItemQueue.AccountsQueue.Enqueue(x));
-        ProxysData.ForEach(x => ItemQueue.ProxysQueue.Enqueue(x));
         for (int i = 0; i < mainWindowViewModel.MaxRun; i++)
         {
           ItemQueue itemQueue = new ItemQueue(mainWindowViewModel.LogCallback);
           taskQueue.Add(itemQueue);
         }
         time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_checkpoint.txt", true);
-        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_failed.txt", true);
-        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_success_.txt", true);
-        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\{time}_CheckGPLX_error.txt", true);
+        ItemQueue.ResultCheckPoint = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_checkpoint_{time}.txt", true);
+        ItemQueue.ResultFailed = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_failed_{time}.txt", true);
+        ItemQueue.ResultSuccess = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_success_{time}.txt", true);
+        ItemQueue.ResultError = new StreamWriter(Extensions.OutputPath + $"\\CheckGPLX_error_{time}.txt", true);
         taskQueue.MaxRun = mainWindowViewModel.MaxRun;
       }
     }
@@ -237,5 +240,12 @@ namespace FacebookGPLX.UI
 
 
     #endregion Button
+
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      ComboBoxViewModel comboBoxViewModel = cbb.SelectedItem as ComboBoxViewModel;
+      Extensions.Setting.Setting.TypeRun = comboBoxViewModel.TypeRun;
+      Extensions.Setting.Save();
+    }
   }
 }

@@ -12,7 +12,7 @@
         MinHeight="300" MinWidth="650"
         Title="Facebook GPLX" Height="397" Width="885" WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <WpfUiConventers:EnumConventer x:Key="EnumConventer" IsAttributeFlag="False" />
+        <WpfUiConventers:EnumConverter x:Key="EnumConventer" IsAttributeFlag="False" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -60,6 +60,13 @@
             <Button x:Name="BT_StopNext" Click="BT_StopNext_Click" Content="Dừng log acc tiếp theo" HorizontalAlignment="Left" Margin="5,0,0,5" VerticalAlignment="Bottom" Width="155" />
             <TextBlock HorizontalAlignment="Left" Margin="5,173,0,0" TextWrapping="Wrap" Text="2Captcha Key:" VerticalAlignment="Top" />
             <TextBox Height="20" Margin="84,171,5,0" Text="{Binding TwoCaptchaKey}" VerticalAlignment="Top" />
+            <ComboBox x:Name="cbb" HorizontalAlignment="Left" Margin="5,197,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding CbbData}" SelectionChanged="ComboBox_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding TypeRun}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
         </Grid>
 
         <ListView Grid.Column="1" ItemsSource="{Binding Logs}" Margin="5,5,5,5">

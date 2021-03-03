@@ -10,7 +10,7 @@ namespace FacebookGPLX
   internal static class Extensions
   {
     public static string ExeFolderPath { get; } = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-    public static string ChromeDrivePath { get; } = ExeFolderPath + "\\ChromeDrive";
+    public static string ChromeDriverPath { get; } = ExeFolderPath + "\\ChromeDrive";
     public static string ChromeProfilePath { get; } = ExeFolderPath + "\\Profiles";
     public static string OutputPath { get; } = ExeFolderPath + "\\Output";
     public static string ImageSuccess { get; } = OutputPath + "\\ImageSuccess";

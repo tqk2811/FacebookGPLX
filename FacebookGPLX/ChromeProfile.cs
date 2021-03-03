@@ -21,6 +21,7 @@ using TqkLibrary.Net.PhoneNumberApi.OtpSimCom;
 using TqkLibrary.Net.PhoneNumberApi.SimThueCom;
 using TqkLibrary.SeleniumSupport;
 using TqkLibrary.Net.Captcha.TwoCaptchaCom;
+using System.Threading;
 
 namespace FacebookGPLX
 {
@@ -57,7 +58,7 @@ namespace FacebookGPLX
 
     public event LogCallback LogEvent;
 
-    public ChromeProfile(string ProfileName) : base(Extensions.ChromeDrivePath)
+    public ChromeProfile(string ProfileName) : base(Extensions.ChromeDriverPath)
     {
       this.ProfileName = ProfileName;
       this.ProfilePath = Extensions.ChromeProfilePath + "\\" + ProfileName;
@@ -65,10 +66,19 @@ namespace FacebookGPLX
 
     private ChromeOptions InitChromeOptions(string proxy = null, string extensionPath = null)
     {
+      lock(regex_smsCode)
+      {
+        if (!File.Exists(Extensions.ChromeDriverPath + "\\chromedriver.exe")) Extensions.Setting.Setting.ChromeVer = 0;
+        Extensions.Setting.Setting.ChromeVer = ChromeDriverUpdater.Download(Extensions.ChromeDriverPath, Extensions.Setting.Setting.ChromeVer).Result;
+        Extensions.Setting.Save();
+      }
+
       ChromeOptions options = new ChromeOptions();
       UA = UserAgent.GetRandom();
+      if (string.IsNullOrWhiteSpace(UA)) throw new Exception("UA is null");
       options.AddArguments("--no-sandbox");
       options.AddArguments("--user-agent=" + UA);
+      WriteLog("Using UA:" + UA);
       options.AddArguments("--disable-notifications");
       options.AddArguments("--disable-web-security");
       options.AddArguments("--disable-blink-features");
@@ -103,7 +113,7 @@ namespace FacebookGPLX
       {
         WriteLog("Start Run Login");//id=ssrb_top_nav_start is logged
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com");
-        WaitUntil(By.TagName("body"), ElementsExists);
+        WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
 
         var eles = chromeDriver.FindElements(By.CssSelector("button[data-cookiebanner='accept_button']"));
         if (eles.Count > 0)
@@ -127,7 +137,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.Name("login"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Name login");
         eles.First().Click();
-        WaitUntil(By.TagName("body"), ElementsExists);
+        WaitUntil(By.TagName("body"), ElementsExists,true, 500, 30000);
 
         eles = chromeDriver.FindElements(By.Id("pass"));
         if (eles.Count > 0)
@@ -139,7 +149,7 @@ namespace FacebookGPLX
           eles = chromeDriver.FindElements(By.Id("loginbutton"));
           if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id loginbutton");
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         if (chromeDriver.FindElements(By.Id("pass")).Count > 0) throw new ChromeAutoException("Đăng nhập thất bại, mật khẩu bị đổi hoặc không đúng.");
@@ -156,49 +166,49 @@ namespace FacebookGPLX
           eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
           if (eles.Count == 0) throw new ChromeAutoException("FindElements CssSelector button[id='checkpointSubmitButton']");
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
           eles.First().Click();
-          WaitUntil(By.TagName("body"), ElementsExists);
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
 
         if (chromeDriver.Url.Contains("www.facebook.com/checkpoint/")) throw new CheckPointException();
@@ -214,18 +224,20 @@ namespace FacebookGPLX
       {
         WriteLog("Check Account Quality");
         chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
-        WaitUntil(By.TagName("body"), ElementsExists);
-        DelayWeb();
+        WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
+        DelayStep();
         var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
         if (eles.Count == 0) eles = chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
         if (eles.Count == 0)
           throw new AdsException("Không tìm thấy nút kháng nghị");
         eles.First().Click();
-        WaitUntil(By.TagName("body"), ElementsExists);
+        WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         var token = this.Token;
         DelayWeb();
         if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/"))
           throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
+
+        task.Wait();
 
         for (int i = 0; i < 2; i++)
         {
@@ -235,7 +247,6 @@ namespace FacebookGPLX
             //CheckSomethingWentWrong();
             CheckEmail();
             ClickContinue();
-            GetOtpSms();
             ClickCaptcha();
             GetOtpSms();
             if (UploadImageFile(task, imagePath))
@@ -253,6 +264,144 @@ namespace FacebookGPLX
       }
       else throw new ChromeAutoException("Chrome is not open");
     }
+
+    public void RunAdsManager2(string imagePath, string password, Task task, ProxyHelper proxyHelper = null)
+    {
+      if (IsOpenChrome)
+      {
+        WriteLog("Check Account Quality");
+        chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
+        WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
+        DelayStep();
+        var eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
+        if (eles.Count == 0) eles = chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
+        if (eles.Count == 0)
+          throw new AdsException("Không tìm thấy nút kháng nghị");
+        eles.First().Click();
+        WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
+        DelayWeb();
+        if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/"))
+          throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint");
+        task.Wait();
+
+        bool smsSuccess = false;
+        try
+        {
+          for (int i = 0; i < 2; i++)
+          {
+            int TryTimes = 0;
+            while (TryTimes++ < 6)
+            {
+              CheckEmail();
+              ClickContinue();
+              ClickCaptcha();
+              if (GetOtpSms())
+              {
+                smsSuccess = true;
+                break;
+              }
+
+              WriteLog($"Try Times {TryTimes}");
+            }
+            if (smsSuccess) break;
+            else
+            {
+              WriteLog($"SomethingWentWrong");
+              chromeDriver.Navigate().GoToUrl(chromeDriver.Url);
+              DelayWeb();
+            }
+          }
+          if (!smsSuccess) throw new ChromeAutoException("Auto failed");
+
+
+          chromeDriver.Navigate().GoToUrl("https://www.facebook.com/accountquality/");
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
+          DelayStep();
+          eles = chromeDriver.FindElements(By.CssSelector("button[target='_blank']"));
+          if (eles.Count == 0) eles = chromeDriver.FindElements(By.CssSelector("a[type='button'][target='_blank']"));
+          if (eles.Count == 0)
+            throw new AdsException("Không tìm thấy nút kháng nghị 2");
+          eles.First().Click();
+          WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
+          DelayWeb();
+          if (!chromeDriver.Url.Contains("www.facebook.com/checkpoint/"))
+            throw new ChromeAutoException("Url not Contains www.facebook.com/checkpoint 2");
+
+
+          for (int i = 0; i < 2; i++)
+          {
+            int TryTimes = 0;
+            while (TryTimes++ < 6)
+            {
+              CheckEmail();
+              ClickContinue();
+              ClickCaptcha();
+              if (UploadImageFile(task, imagePath))
+              {
+                ClickContinue();
+                return;
+              }
+              WriteLog($"Try Times {TryTimes}");
+            }
+          }
+        }
+        finally
+        {
+          if (smsSuccess) 
+            Func(password);
+        }
+      }
+      else throw new ChromeAutoException("Chrome is not open");
+    }
+
+    void Func(string password)
+    {
+      chromeDriver.Navigate().GoToUrl("https://www.facebook.com/settings?tab=mobile");
+      DelayWeb();
+      //var body = WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000).First();
+      //var popup = chromeDriver.FindElements(By.CssSelector("div[role='dialog'] div[role='button'][class*='synb87wq']")).FirstOrDefault();
+      //if (popup != null)
+      //{
+      //  popup.Click();
+      //  DelayStep();
+      //}
+
+      //var popup2 = chromeDriver.FindElements(By.CssSelector("div[role='dialog'] div[role='button'][class*='synb87wq']"));
+      //if (popup2.Count > 1)
+      //{
+      //  popup2.Last().Click();
+      //  DelayStep();
+      //}
+      //body.SendKeys(Keys.Escape);
+
+      using (FrameSwitch frameSwitch = FrameSwitch(WaitUntil(By.TagName("iframe[src*='https://www.facebook.com/settings?']"), ElementsExists, true, 500, 30000).First()))
+      {
+        var SettingsPage_Content = WaitUntil(By.TagName("div[id='SettingsPage_Content']"), ElementsExists, true, 500, 30000).First();
+
+        var a_e = WaitUntil(SettingsPage_Content, By.TagName("span a[role='button']"), ElementsExists, true, 500, 30000).First();
+        JsClick(a_e);
+        DelayWeb();
+
+        var dialog = WaitUntil(By.TagName("div[role='dialog']:not([class*='uiToggleFlyout'])"), ElementsExists, true, 500, 30000).First();
+        var checkbox = WaitUntil(dialog, By.TagName("input[type='checkbox']"), ElementsExists, true, 500, 30000).First();
+        JsClick(checkbox);
+        var submit = WaitUntil(dialog, By.TagName("button[type*='submit']"), ElementsExists, true, 500, 30000).First();
+        JsClick(submit);
+        DelayStep();
+
+
+        var pass = chromeDriver.FindElements(By.CssSelector("input[type='password']"));
+        if (pass.Count > 0)
+        {
+          pass.First().SendKeys(password);
+          submit = WaitUntil(dialog, By.TagName("button[type='submit']"), ElementsExists, true, 500, 30000).First();
+          JsClick(submit);
+        }
+
+        DelayWeb();
+      }
+    }
+
 
     public AdsResult Check()
     {
@@ -331,11 +480,12 @@ namespace FacebookGPLX
 
     private void ClickContinue()
     {
-      var eles = chromeDriver.FindElements(By.CssSelector("div[role='button']:not([type='file'])"));
+      var eles = chromeDriver.FindElements(By.CssSelector("div[data-pagelet='root'] div[role='button']:not([type='file'])"));
       if (eles.Count != 0)
       {
         var ele = eles.Last();
-        if (ele.Enabled && ele.Displayed)
+        string ele_class = ele.GetAttribute("class");
+        if (!ele_class.Contains("rj84mg9z"))//disable mouse rj84mg9z
         {
           try
           {
@@ -345,7 +495,7 @@ namespace FacebookGPLX
           }
           catch (Exception) { }
         }
-        else WriteLog($"Continue: Enabled {ele.Enabled}, Displayed {ele.Displayed}");
+        //else WriteLog($"Continue: Enabled {ele.Enabled}, Displayed {ele.Displayed}");
       }
     }
 
@@ -357,7 +507,7 @@ namespace FacebookGPLX
 
     private void ClickCaptcha()
     {
-      var eles = chromeDriver.FindElements(By.CssSelector("iframe[src='/common/referer_frame.php']"));
+      var eles = chromeDriver.FindElements(By.CssSelector("div[data-pagelet='root'] iframe[src='/common/referer_frame.php']"));
       if (eles.Count > 0)
       {
         WriteLog("Resolve Captcha");
@@ -368,7 +518,7 @@ namespace FacebookGPLX
 
     #region SMS
 
-    private void GetOtpSms()
+    private bool GetOtpSms()
     {
       var eles = chromeDriver.FindElements(By.Name("phone"));
       if (eles.Count > 0)
@@ -387,30 +537,30 @@ namespace FacebookGPLX
           }
 
           WriteLog("Phone Number: " + phoneNumber);
-          try
-          {
-            eles.First().Clear();
-          }
-          catch (Exception) { }
+
+          try { eles.First().Clear(); } catch (Exception) { }
+
           eles.First().SendKeys(phoneNumber);
 
           ClickContinue();
 
           string code = string.Empty;
-          int reTry = 30;
-          while (reTry-- != 0)
+          using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(130000))
           {
-            try
+            while(string.IsNullOrEmpty(code) && !cancellationTokenSource.IsCancellationRequested)
             {
-              code = GetSms();
+              try
+              {
+                code = GetSms();
+              }
+              catch (Exception ex2)
+              {
+                WriteLog("Get code sms Exception: " + ex2.Message);
+                break;
+              }
+              if (!string.IsNullOrEmpty(code)) break;
+              else DelayStep();
             }
-            catch (Exception ex2)
-            {
-              WriteLog("Get code sms Exception: " + ex2.Message);
-              break;
-            }
-            if (!string.IsNullOrEmpty(code)) break;
-            else DelayStep();
           }
           if (string.IsNullOrEmpty(code))
           {
@@ -425,10 +575,11 @@ namespace FacebookGPLX
 
           WaitUntil(By.CssSelector("div[role='button'][class*='s1i5eluu']"), ElementsExists).First().Click();
           DelayWeb();
-          return;
+          return true;
         }
         throw new ChromeAutoException($"RentCode Lấy sms thất bại với {phoneTry} lần thử");
       }
+      return false;
     }
 
     private string GetPhoneNumber()

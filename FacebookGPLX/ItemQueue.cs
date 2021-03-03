@@ -1,6 +1,7 @@
 ﻿using FacebookGPLX.Common;
 using FacebookGPLX.Data;
 using Newtonsoft.Json;
+using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,10 +20,11 @@ namespace FacebookGPLX
 {
   internal class ItemQueue : IQueue
   {
+    public static readonly Random random = new Random();
     public static bool RunFlag { get; set; }
     public static readonly Queue<AccountData> AccountsQueue = new Queue<AccountData>();
     public static bool StopLogAcc { get; set; } = false;
-    public static readonly Queue<string> ProxysQueue = new Queue<string>();
+    public static readonly List<string> ProxysList = new List<string>();
     public static StreamWriter ResultSuccess { get; set; }
     public static StreamWriter ResultFailed { get; set; }
     public static StreamWriter ResultError { get; set; }
@@ -59,15 +61,11 @@ namespace FacebookGPLX
               chromeProfile = new ChromeProfile("Profile_" + profile_index++);
               chromeProfile.LogEvent += logCallback;
             }
-#if DEBUG
-            //chromeProfile.OpenChrome(0);
-            //chromeProfile.RunAdsManager("", Task.FromResult(0), null);
-            //return;
-#endif
+
             ProxyHelper proxyHelper = null;
-            if (ProxysQueue.Count > 0)
+            if (ProxysList.Count > 0)
             {
-              proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
+              proxyHelper = new ProxyHelper(ProxysList[random.Next(ProxysList.Count)]);
               if (proxyHelper.IsLogin)//extension
               {
                 string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
@@ -79,6 +77,7 @@ namespace FacebookGPLX
             else chromeProfile.OpenChrome(index_location);
 
             chromeProfile.RunLogin(accountData);
+
             string access_token = chromeProfile.GetToken();
             chromeProfile.WriteLog("Access Token: " + access_token);
 
@@ -96,6 +95,7 @@ namespace FacebookGPLX
               id = json.id;
               birthday = json.birthday;
               name = json.name;
+              if (string.IsNullOrEmpty(birthday)) throw new ChromeAutoException("Chưa có ngày sinh");
               DateTime dateTime = DateTime.ParseExact(birthday, "MM/dd/yyyy", CultureInfo.CurrentCulture);
 
               using (Bitmap image = facebookApi.PictureBitMap(access_token).Result)
@@ -105,14 +105,31 @@ namespace FacebookGPLX
               chromeProfile.WriteLog("Download & Edit Avatar Completed");
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
+            switch(Extensions.Setting.Setting.TypeRun)
+            {
+              case TypeRun.V1:
+                chromeProfile.RunAdsManager(imagePath, task, proxyHelper);
+                break;
+
+              case TypeRun.V2:
+                chromeProfile.RunAdsManager2(imagePath, accountData.PassWord, task, proxyHelper);
+                break;
+            }
+
             ResultSuccess?.WriteLine(accountData);
             ResultSuccess?.Flush();
             File.Copy(imagePath, Extensions.ImageSuccess + $"\\{id}.png", true);
           }
           catch (OperationCanceledException oce)
           {
-            if(chromeProfile.Token.IsCancellationRequested) return;
+            if(chromeProfile.Token.IsCancellationRequested)
+            {
+              lock (AccountsQueue)
+              {
+                AccountsQueue.Enqueue(accountData);
+              }
+              return;
+            }
             chromeProfile.WriteLog("OperationCanceledException:" + accountData + $"| {oce.StackTrace}");
           }
           catch (AdsException ae)
@@ -142,8 +159,9 @@ namespace FacebookGPLX
           catch (Exception ex)
           {
             if (ex is AggregateException ae) ex = ae.InnerException;
-            ResultError?.WriteLine($"{accountData}| -> {ex.Message}");
-            ResultError?.Flush();
+            if(accountData != null) lock (AccountsQueue) AccountsQueue.Enqueue(accountData);
+            //ResultError?.WriteLine($"{accountData}| -> {ex.Message}");
+            //ResultError?.Flush();
             chromeProfile.WriteLog(ex.GetType().FullName + ":" + ex.Message + ex.StackTrace);
             try
             {
@@ -158,6 +176,12 @@ namespace FacebookGPLX
             SaveDataChuaChay();
             chromeProfile.CloseChrome();
             chromeProfile.WriteLog("Close chrome");
+
+            string profile_dir = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName;
+            Task.Delay(60000).ContinueWith((t) =>
+            {
+              try { Directory.Delete(profile_dir, true); } catch (Exception) { }
+            });
           }
         }
       }
@@ -185,9 +209,9 @@ namespace FacebookGPLX
           }
 
           //string proxy = null;
-          if (ProxysQueue.Count > 0)
+          if (ProxysList.Count > 0)
           {
-            ProxyHelper proxyHelper = new ProxyHelper(ProxysQueue.Dequeue());
+            ProxyHelper proxyHelper = new ProxyHelper(ProxysList[random.Next(ProxysList.Count)]);
             if (proxyHelper.IsLogin)//extension
             {
               string ext_path = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".zip";
@@ -237,8 +261,9 @@ namespace FacebookGPLX
         catch (Exception ex)
         {
           if (ex is AggregateException ae) ex = ae.InnerException;
-          ResultError?.WriteLine(accountData + "| -> " + ex.Message);
-          ResultError?.Flush();
+          if (accountData != null) lock (AccountsQueue) AccountsQueue.Enqueue(accountData);
+          //ResultError?.WriteLine(accountData + "| -> " + ex.Message);
+          //ResultError?.Flush();
           chromeProfile.WriteLog(ex.GetType().FullName + ":" + ex.Message + ex.StackTrace);
         }
         finally
@@ -247,6 +272,12 @@ namespace FacebookGPLX
           chromeProfile.ClearCookies();
           chromeProfile.CloseChrome();
           chromeProfile.WriteLog("Close chrome");
+
+          string profile_dir = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName;
+          Task.Delay(60000).ContinueWith((t) =>
+          {
+            try { Directory.Delete(profile_dir, true); } catch (Exception) { }
+          });
         }
       }
     }

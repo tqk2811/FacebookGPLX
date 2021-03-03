@@ -18,6 +18,11 @@ namespace FacebookGPLX.Data
     ChoThueSim = 4
   }
 
+  public enum TypeRun
+  {
+    V1 = 0,
+    V2 = 1,
+  }
   internal class SettingData
   {
     public int MaxRun { get; set; } = 1;
@@ -43,5 +48,7 @@ namespace FacebookGPLX.Data
     public int DelayWebMax { get; set; } = 8000;
     public int ReTryCount { get; set; } = 5;
     public SmsService SmsService { get; set; } = SmsService.Rencode;
+    public int ChromeVer { get; set; } = 0;
+    public TypeRun TypeRun { get; set; } = TypeRun.V1;
   }
 }

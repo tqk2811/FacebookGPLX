@@ -300,7 +300,11 @@ namespace FacebookGPLX
                 smsSuccess = true;
                 break;
               }
-
+              if (UploadImageFile(task, imagePath))
+              {
+                ClickContinue();
+                return;
+              }
               WriteLog($"Try Times {TryTimes}");
             }
             if (smsSuccess) break;

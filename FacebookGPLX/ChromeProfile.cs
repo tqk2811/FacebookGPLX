@@ -22,14 +22,15 @@ using TqkLibrary.Net.PhoneNumberApi.SimThueCom;
 using TqkLibrary.SeleniumSupport;
 using TqkLibrary.Net.Captcha.TwoCaptchaCom;
 using System.Threading;
+using FacebookGPLX.UI.ViewModels;
 
 namespace FacebookGPLX
 {
-  internal class CheckPointException : Exception
+  class CheckPointException : Exception
   {
   }
 
-  internal class AdsException : Exception
+  class AdsException : Exception
   {
     public AdsException()
     {
@@ -40,16 +41,16 @@ namespace FacebookGPLX
     }
   }
 
-  internal enum AdsResult
+  enum AdsResult
   {
     NotFound,
     Failed,
     Success
   }
 
-  internal delegate void LogCallback(string log);
+  delegate void LogCallback(string log);
 
-  internal class ChromeProfile : BaseChromeProfile
+  class ChromeProfile : BaseChromeProfile
   {
     private static readonly Regex regex_smsCode = new Regex("\\d{6}");
     private readonly string ProfilePath;
@@ -73,25 +74,11 @@ namespace FacebookGPLX
         Extensions.Setting.Save();
       }
 
-      ChromeOptions options = new ChromeOptions();
-      UA = UserAgent.GetRandom();
+      UA = UserAgentHelper.GetRandomUa();
       if (string.IsNullOrWhiteSpace(UA)) throw new Exception("UA is null");
-      options.AddArguments("--no-sandbox");
-      options.AddArguments("--user-agent=" + UA);
+
+      ChromeOptions options = DefaultChromeOptions().AddUserAgent(UA).AddProfilePath(ProfilePath);
       WriteLog("Using UA:" + UA);
-      options.AddArguments("--disable-notifications");
-      options.AddArguments("--disable-web-security");
-      options.AddArguments("--disable-blink-features");
-      options.AddArguments("--disable-blink-features=AutomationControlled");
-      options.AddArguments("--disable-infobars");
-      options.AddArguments("--ignore-certificate-errors");
-      options.AddArguments("--allow-running-insecure-content");
-      options.AddArguments("--user-data-dir=" + ProfilePath);
-      options.AddAdditionalCapability("useAutomationExtension", false);
-      options.AddExcludedArgument("enable-automation");
-      //disable ask password
-      options.AddUserProfilePreference("credentials_enable_service", false);
-      options.AddUserProfilePreference("profile.password_manager_enabled", false);
       if (!string.IsNullOrEmpty(extensionPath)) options.AddExtensions(extensionPath);
       if (!string.IsNullOrEmpty(proxy)) options.AddArguments("--proxy-server=" + string.Format("http://{0}", proxy));
       return options;
@@ -128,11 +115,15 @@ namespace FacebookGPLX
         WriteLog("UserName: " + accountData.UserName);
         eles.First().SendKeys(accountData.UserName);
 
+        DelayStep();
+
         eles = chromeDriver.FindElements(By.Id("pass"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Id pass");
         eles.First().Click();
         WriteLog("PassWord: " + accountData.PassWord);
         eles.First().SendKeys(accountData.PassWord);
+
+        DelayStep();
 
         eles = chromeDriver.FindElements(By.Name("login"));
         if (eles.Count == 0) throw new ChromeAutoException("FindElements By.Name login");
@@ -142,6 +133,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.Id("pass"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WriteLog("PassWord: " + accountData.PassWord);
           eles.First().SendKeys(accountData.PassWord);
@@ -157,6 +149,8 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.Id("approvals_code"));
         if (eles.Count > 0)
         {
+          DelayStep();
+
           TwoFactorAuthNet.TwoFactorAuth twoFactorAuth = new TwoFactorAuthNet.TwoFactorAuth();
           eles.First().Click();
           string facode = twoFactorAuth.GetCode(accountData.TwoFA);
@@ -172,6 +166,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
@@ -179,6 +174,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
@@ -186,6 +182,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
@@ -193,6 +190,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
@@ -200,6 +198,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }
@@ -207,6 +206,7 @@ namespace FacebookGPLX
         eles = chromeDriver.FindElements(By.CssSelector("button[id='checkpointSubmitButton']"));
         if (eles.Count > 0)
         {
+          DelayStep();
           eles.First().Click();
           WaitUntil(By.TagName("body"), ElementsExists, true, 500, 30000);
         }

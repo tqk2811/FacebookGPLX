@@ -11,7 +11,15 @@ using TqkLibrary.WpfUi.ObservableCollection;
 
 namespace FacebookGPLX.UI.ViewModels
 {
-  public class MainWindowViewModel : BaseViewModel
+  enum SmsService
+  {
+    None = 0,
+    Rencode = 1,
+    OtpSim = 2,
+    SimThue = 3,
+    ChoThueSim = 4
+  }
+  class MainWindowViewModel : BaseViewModel
   {
     public MainWindowViewModel(Dispatcher dispatcher) : base(dispatcher)
     {

@@ -1,5 +1,6 @@
 ﻿using FacebookGPLX.Common;
 using FacebookGPLX.Data;
+using FacebookGPLX.UI.ViewModels;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using System;
@@ -18,7 +19,7 @@ using TqkLibrary.SeleniumSupport;
 
 namespace FacebookGPLX
 {
-  internal class ItemQueue : IQueue
+  class ItemQueue : IQueue
   {
     public static readonly Random random = new Random();
     public static bool RunFlag { get; set; }
@@ -77,8 +78,11 @@ namespace FacebookGPLX
             else chromeProfile.OpenChrome(index_location);
 
             chromeProfile.RunLogin(accountData);
-
+           
             string access_token = chromeProfile.GetToken();
+
+            accountData.AccessToken = access_token;
+
             chromeProfile.WriteLog("Access Token: " + access_token);
 
             string imagePath = Extensions.ChromeProfilePath + "\\" + chromeProfile.ProfileName + ".png";

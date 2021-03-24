@@ -1,0 +1,17 @@
+﻿<?xml version='1.0'?><!--https://docs.obfuscar.com/getting-started/configuration.html-->
+<Obfuscator>
+  <Var name="InPath" value="." />
+  <Var name="OutPath" value=".\Obf" />
+
+  <Var name="KeepPublicApi" value="true" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="HideStrings" value="true" />
+
+  <Module file="$(InPath)\FacebookGPLX.exe" >
+    <SkipNamespace name="FacebookGPLX.UI" />
+    <SkipNamespace name="FacebookGPLX.UI.ViewModels" />
+    <SkipType name="FacebookGPLX.CheckPointException" skipMethods="true" skipFields="true" skipProperties="true" skipEvents="true" />
+    <SkipType name="FacebookGPLX.AdsException" skipMethods="true" skipFields="true" skipProperties="true" skipEvents="true" />
+    <SkipType name="FacebookGPLX.AdsResult" skipMethods="true" skipFields="true" skipProperties="true" skipEvents="true" />
+  </Module>
+</Obfuscator>

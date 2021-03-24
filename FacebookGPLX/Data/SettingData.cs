@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using FacebookGPLX.UI.ViewModels;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,21 +10,7 @@ using System.Timers;
 
 namespace FacebookGPLX.Data
 {
-  public enum SmsService
-  {
-    None = 0,
-    Rencode = 1,
-    OtpSim = 2,
-    SimThue = 3,
-    ChoThueSim = 4
-  }
-
-  public enum TypeRun
-  {
-    V1 = 0,
-    V2 = 1,
-  }
-  internal class SettingData
+  class SettingData
   {
     public int MaxRun { get; set; } = 1;
 

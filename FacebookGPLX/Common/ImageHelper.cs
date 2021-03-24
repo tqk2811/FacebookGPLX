@@ -4,7 +4,7 @@ using System.IO;
 using TqkLibrary.Media.Images;
 namespace FacebookGPLX.Common
 {
-  public static class ImageHelper
+  static class ImageHelper
   {
     static readonly Random random = new Random();
     public static Bitmap DrawGPLX(this Bitmap bitMap,string Name,string DateOfBirth)

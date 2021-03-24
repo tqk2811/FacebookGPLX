@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace FacebookGPLX.UI.ViewModels
 {
-  public class ComboBoxViewModel
+  enum TypeRun
+  {
+    V1 = 0,
+    V2 = 1,
+  }
+  class ComboBoxViewModel
   {
     public ComboBoxViewModel(TypeRun typeRun)
     {

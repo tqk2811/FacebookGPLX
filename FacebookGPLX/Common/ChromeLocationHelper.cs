@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FacebookGPLX.Common
 {
-  public static class ChromeLocationHelper
+  static class ChromeLocationHelper
   {
     private static int base_TitleAndTaskbar = 30;
     private static RECT RECT;

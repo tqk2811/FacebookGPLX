@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacebookGPLX", "FacebookGPLX\FacebookGPLX.csproj", "{80D24699-E6A2-4626-88FE-D8E3FCE926CA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8BD334A7-691C-41BC-81B9-49423A2CE489}"
+	ProjectSection(SolutionItems) = preProject
+		release.ps1 = release.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

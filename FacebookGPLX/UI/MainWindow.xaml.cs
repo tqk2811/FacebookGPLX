@@ -44,7 +44,6 @@ namespace FacebookGPLX.UI
       Directory.CreateDirectory(Extensions.ChromeProfilePath);
       Directory.CreateDirectory(Extensions.ImageSuccess);
       Directory.CreateDirectory(Extensions.DebugData);
-      UserAgent.Load(Extensions.ExeFolderPath + "\\UAs.txt");
       mainWindowViewModel = new MainWindowViewModel(this.Dispatcher);
       this.DataContext = mainWindowViewModel;
       InitializeComponent();

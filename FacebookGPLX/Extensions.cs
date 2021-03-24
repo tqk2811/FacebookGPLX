@@ -1,15 +1,16 @@
 ﻿using FacebookGPLX.Data;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.WpfUi;
 namespace FacebookGPLX
 {
-  internal static class Extensions
+  static class Extensions
   {
-    public static string ExeFolderPath { get; } = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+    public static string ExeFolderPath { get; } = Directory.GetCurrentDirectory();
     public static string ChromeDriverPath { get; } = ExeFolderPath + "\\ChromeDrive";
     public static string ChromeProfilePath { get; } = ExeFolderPath + "\\Profiles";
     public static string OutputPath { get; } = ExeFolderPath + "\\Output";
